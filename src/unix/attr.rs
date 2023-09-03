@@ -14,6 +14,6 @@ pub fn get_terminal_attr() -> Result<termios> {
     }
 }
 
-pub fn set_terminal_attr(termios: &mut termios) -> Result<()> {
+pub fn set_terminal_attr(termios: &termios) -> Result<()> {
     unsafe { c_result(tcsetattr(STDIN_FILENO, TCSANOW, termios)).and(Ok(())) }
 }
