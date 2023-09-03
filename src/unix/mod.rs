@@ -1,5 +1,6 @@
 pub mod attr;
 pub mod size;
+pub mod tty;
 
 use std::io::{Error, Result};
 
