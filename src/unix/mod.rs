@@ -15,9 +15,9 @@ impl IsMinusOne for i32 {
 
 fn c_result<T: IsMinusOne>(n: T) -> Result<T> {
     if n.is_minus_one() {
-        Ok(n)
-    } else {
         Err(Error::last_os_error())
+    } else {
+        Ok(n)
     }
 }
 
