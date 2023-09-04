@@ -3,6 +3,7 @@ use libc::{ioctl, winsize, STDIN_FILENO, TIOCGWINSZ};
 use std::{io::Result, mem::MaybeUninit};
 
 // (columns, rows)
+#[derive(Debug)]
 pub struct Size(u16, u16);
 
 pub fn get_terminal_size() -> Result<Size> {
