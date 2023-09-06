@@ -2,5 +2,6 @@
 #[cfg_attr(unix, path = "unix/mod.rs")]
 mod system;
 
+pub mod event;
 pub mod input;
 pub mod raw;
