@@ -6,6 +6,12 @@ use std::{io::Result, mem::MaybeUninit};
 #[derive(Debug)]
 pub struct Size(u16, u16);
 
+impl Size {
+    pub fn new(x: u16, y: u16) -> Self {
+        Size(x, y)
+    }
+}
+
 pub fn get_terminal_size() -> Result<Size> {
     unsafe {
         let mut size: MaybeUninit<winsize> = MaybeUninit::uninit();
