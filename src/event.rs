@@ -1,12 +1,12 @@
 use super::system::size::Size;
 
-use std::{
-    fmt::Debug,
-    io::{Error, ErrorKind},
-};
+use std::io::{Error, ErrorKind};
 
 const CTRL_1_OFFSET: u8 = 0x60;
 const CTRL_2_OFFSET: u8 = 0x34;
+
+const PARSE_ERROR: &str = "Could not parse event";
+const UTF8_ERROR: &str = "Character is not valid UTF-8";
 
 #[derive(Debug)]
 pub enum Event {
@@ -51,33 +51,36 @@ pub enum Key {
 
 pub fn parse_event<T>(byte: u8, iter: &mut T) -> Result<Event, Error>
 where
-    T: Iterator<Item = Result<u8, Error>> + Debug,
+    T: Iterator<Item = Result<u8, Error>>,
 {
-    let error = Error::new(ErrorKind::Other, "Could not parse event");
-
     match byte {
         // ESC sequence
         b'\x1b' => {
-            let byte = iter.next();
+            let byte = iter
+                .next()
+                .ok_or(Error::new(ErrorKind::Other, PARSE_ERROR))?;
 
             match byte {
                 // CSI sequence
-                Some(Ok(b'[')) => unimplemented!("csi handling"),
-                Some(Ok(b'O')) => {
-                    let byte = iter.next();
+                Ok(b'[') => unimplemented!("csi handling"),
+                Ok(b'O') => {
+                    let byte = iter
+                        .next()
+                        .ok_or(Error::new(ErrorKind::Other, PARSE_ERROR))?;
+
                     match byte {
-                        Some(Ok(b'P')) => Ok(Event::Key(Key::F1)),
-                        Some(Ok(b'Q')) => Ok(Event::Key(Key::F2)),
-                        Some(Ok(b'R')) => Ok(Event::Key(Key::F3)),
-                        Some(Ok(b'S')) => Ok(Event::Key(Key::F4)),
-                        _ => Err(error),
+                        Ok(b'P') => Ok(Event::Key(Key::F1)),
+                        Ok(b'Q') => Ok(Event::Key(Key::F2)),
+                        Ok(b'R') => Ok(Event::Key(Key::F3)),
+                        Ok(b'S') => Ok(Event::Key(Key::F4)),
+                        _ => Err(Error::new(ErrorKind::Other, PARSE_ERROR)),
                     }
                 }
-                Some(Ok(c)) => {
+                Ok(c) => {
                     let utf8_char = parse_utf8(c, iter)?;
                     Ok(Event::Key(Key::Alt(utf8_char)))
                 }
-                _ => Err(error),
+                _ => Err(Error::new(ErrorKind::Other, PARSE_ERROR)),
             }
         }
         b'\t' => Ok(Event::Key(Key::Tab)),
@@ -114,9 +117,9 @@ where
                     return Ok(utf8.chars().next().unwrap());
                 }
             }
-            Err(_) => return Err(Error::new(ErrorKind::Other, "Character is not valid UTF-8")),
+            Err(_) => return Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR)),
         }
     }
 
-    Err(Error::new(ErrorKind::Other, "Character is not valid UTF-8"))
+    Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR))
 }
