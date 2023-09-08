@@ -73,7 +73,7 @@ where
                 //
                 // The first two bytes in a CSI is always:
                 // 1: 0x1b (hexadecimal) / 27 (decimal)
-                // 2: 0x5B (hexadecimal) / 91 (decimal)
+                // 2: 0x5b (hexadecimal) / 91 (decimal)
                 Ok(b'[') => unimplemented!("csi handling"),
                 Ok(b'O') => {
                     let byte = iter
