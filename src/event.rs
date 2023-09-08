@@ -54,7 +54,10 @@ where
     T: Iterator<Item = Result<u8, Error>>,
 {
     match byte {
-        // ESC sequence
+        // An Escape sequence
+        //
+        // The first byte in an escape sequence is always:
+        // 0x1b (hexadecimal) / 27 (decimal)
         b'\x1b' => {
             let byte = iter.next();
 
@@ -66,7 +69,11 @@ where
             let byte = byte.ok_or(Error::new(ErrorKind::Other, PARSE_ERROR))?;
 
             match byte {
-                // CSI sequence
+                // A CSI (Control Sequence Introducer)
+                //
+                // The first two bytes in a CSI is always:
+                // 1: 0x1b (hexadecimal) / 27 (decimal)
+                // 2: 0x5B (hexadecimal) / 91 (decimal)
                 Ok(b'[') => unimplemented!("csi handling"),
                 Ok(b'O') => {
                     let byte = iter
@@ -116,15 +123,21 @@ where
     for byte in iter {
         match byte {
             Ok(byte) => {
+                // Keep pushing a byte to the 'bytes' vector until we can build a valid UTF-8
+                // string from the vector
                 bytes.push(byte);
 
                 if let Ok(utf8) = String::from_utf8(bytes.clone()) {
+                    // A UTF-8 string can be built from an empty vector, in which case it just
+                    // returns an empty string, which would panic if we try to use chars().next().unwrap()
+                    //
+                    // But as we create the 'bytes' vector with an initial value, we know there is at
+                    // minimum 1 value in the vector, so we can safely use unwrap() here
                     return Ok(utf8.chars().next().unwrap());
                 }
             }
             Err(_) => return Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR)),
         }
     }
-
     Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR))
 }
