@@ -74,7 +74,7 @@ where
                 // The first two bytes in a CSI is always:
                 // 1: 0x1b (hexadecimal) / 27 (decimal)
                 // 2: 0x5b (hexadecimal) / 91 (decimal)
-                Ok(b'[') => unimplemented!("csi handling"),
+                Ok(b'[') => parse_csi(iter).ok_or(Error::new(ErrorKind::Other, PARSE_ERROR)),
                 Ok(b'O') => {
                     let byte = iter
                         .next()
@@ -107,6 +107,54 @@ where
             let utf8_char = parse_utf8(c, iter)?;
             Ok(Event::Key(Key::Char(utf8_char)))
         }
+    }
+}
+
+fn parse_csi<T>(iter: &mut T) -> Option<Event>
+where
+    T: Iterator<Item = Result<u8, Error>>,
+{
+    let byte = iter.next()?.ok()?;
+
+    match byte {
+        b'A' => Some(Event::Key(Key::ArrowUp)),
+        b'B' => Some(Event::Key(Key::ArrowDown)),
+        b'C' => Some(Event::Key(Key::ArrowRight)),
+        b'D' => Some(Event::Key(Key::ArrowLeft)),
+        b'F' => Some(Event::Key(Key::End)),
+        b'H' => Some(Event::Key(Key::Home)),
+        b'0'..=b'9' => {
+            let mut buf = vec![byte];
+            buf.extend(iter.filter_map(|b| b.ok()));
+
+            let byte = buf.pop()?;
+
+            match byte {
+                b'~' => {
+                    let buf = String::from_utf8(buf).ok()?;
+
+                    match buf.as_str() {
+                        "1" | "7" => Some(Event::Key(Key::Home)),
+                        "2" => Some(Event::Key(Key::Insert)),
+                        "3" => Some(Event::Key(Key::Delete)),
+                        "4" | "8" => Some(Event::Key(Key::End)),
+                        "5" => Some(Event::Key(Key::PageUp)),
+                        "6" => Some(Event::Key(Key::PageDown)),
+                        "15" => Some(Event::Key(Key::F5)),
+                        "17" => Some(Event::Key(Key::F6)),
+                        "18" => Some(Event::Key(Key::F7)),
+                        "19" => Some(Event::Key(Key::F8)),
+                        "20" => Some(Event::Key(Key::F9)),
+                        "21" => Some(Event::Key(Key::F10)),
+                        "23" => Some(Event::Key(Key::F11)),
+                        "24" => Some(Event::Key(Key::F12)),
+                        _ => None,
+                    }
+                }
+                _ => None,
+            }
+        }
+        _ => None,
     }
 }
 
