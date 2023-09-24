@@ -6,28 +6,28 @@ use std::{
     thread,
 };
 
-// Input reader for stdin (tty in this case), as it runs in a separate thread it won't block.
-pub struct InputReader {
+// Input reader for tty, as it runs in a separate thread it won't block
+pub struct TTYReader {
     reciever: mpsc::Receiver<Result<u8>>,
 }
 
-impl InputReader {
+impl TTYReader {
     pub fn new() -> Self {
         let (sender, reciever) = channel();
 
         thread::spawn(move || {
-            for byte in tty::tty().unwrap().bytes() {
+            for byte in tty::tty().expect("to read /dev/tty").bytes() {
                 if sender.send(byte).is_err() {
                     return;
                 }
             }
         });
 
-        InputReader { reciever }
+        TTYReader { reciever }
     }
 }
 
-impl Read for InputReader {
+impl Read for TTYReader {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         let mut total = 0;
 
