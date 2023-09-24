@@ -125,7 +125,15 @@ where
         b'H' => Some(Event::Key(Key::Home)),
         b'0'..=b'9' => {
             let mut buf = vec![byte];
-            buf.extend(iter.filter_map(|b| b.ok()));
+
+            let mut byte = iter.next()?.ok()?;
+            buf.push(byte);
+
+            // The last value of a CSI is always gonna be in the range of 64-126
+            while byte < 64 || byte > 126 {
+                byte = iter.next()?.ok()?;
+                buf.push(byte);
+            }
 
             let byte = buf.pop()?;
 
