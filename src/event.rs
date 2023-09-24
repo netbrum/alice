@@ -1,6 +1,6 @@
 use super::system::size::Size;
 
-use std::io::{Error, ErrorKind};
+use std::io::{Error, ErrorKind, Result};
 
 const CTRL_1_OFFSET: u8 = 0x60;
 const CTRL_2_OFFSET: u8 = 0x34;
@@ -49,9 +49,9 @@ pub enum Key {
     Char(char),
 }
 
-pub fn parse_event<T>(byte: u8, iter: &mut T) -> Result<Event, Error>
+pub fn parse_event<T>(byte: u8, iter: &mut T) -> Result<Event>
 where
-    T: Iterator<Item = Result<u8, Error>>,
+    T: Iterator<Item = Result<u8>>,
 {
     match byte {
         // An Escape sequence
@@ -112,7 +112,7 @@ where
 
 fn parse_csi<T>(iter: &mut T) -> Option<Event>
 where
-    T: Iterator<Item = Result<u8, Error>>,
+    T: Iterator<Item = Result<u8>>,
 {
     let byte = iter.next()?.ok()?;
 
@@ -158,9 +158,9 @@ where
     }
 }
 
-fn parse_utf8<T>(byte: u8, iter: &mut T) -> Result<char, Error>
+fn parse_utf8<T>(byte: u8, iter: &mut T) -> Result<char>
 where
-    T: Iterator<Item = Result<u8, Error>>,
+    T: Iterator<Item = Result<u8>>,
 {
     if byte.is_ascii() {
         return Ok(byte as char);
@@ -187,5 +187,6 @@ where
             Err(_) => return Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR)),
         }
     }
+
     Err(Error::new(ErrorKind::InvalidData, UTF8_ERROR))
 }
