@@ -29,10 +29,10 @@ pub trait RawMode: Write + Sized {
 impl<W: Write> RawMode for W {
     fn raw_mode(self) -> Result<RawTerminal<W>> {
         let mut termios = attr::get_terminal_attr()?;
-        let previous = termios.clone();
+        let previous = termios;
 
         attr::enable_raw_mode(&mut termios);
-        attr::set_terminal_attr(&mut termios)?;
+        attr::set_terminal_attr(&termios)?;
 
         Ok(RawTerminal {
             previous_termios: previous,
