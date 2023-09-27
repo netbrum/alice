@@ -129,8 +129,8 @@ where
             let mut byte = iter.next()?.ok()?;
             buf.push(byte);
 
-            // The last value of a CSI is always gonna be in the range of 64-126
-            while byte < 64 || byte > 126 {
+            // The last byte of a CSI is always gonna be in the range of 64-126
+            while !(64..=126).contains(&byte) {
                 byte = iter.next()?.ok()?;
                 buf.push(byte);
             }
