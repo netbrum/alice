@@ -1,8 +1,8 @@
-use super::system::attr;
+use super::system::{attr, Termios};
 use std::io::{Result, Write};
 
 pub struct RawTerminal<W: Write> {
-    previous_termios: libc::termios,
+    previous_termios: Termios,
     out: W,
 }
 

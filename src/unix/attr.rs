@@ -1,12 +1,12 @@
-use super::c_result;
-use libc::{cfmakeraw, tcgetattr, tcsetattr, termios, STDIN_FILENO, TCSANOW};
+use super::{c_result, Termios};
+use libc::{cfmakeraw, tcgetattr, tcsetattr, STDIN_FILENO, TCSANOW};
 use std::{io::Result, mem::MaybeUninit};
 
-pub fn enable_raw_mode(termios: &mut termios) {
+pub fn enable_raw_mode(termios: &mut Termios) {
     unsafe { cfmakeraw(termios) }
 }
 
-pub fn get_terminal_attr() -> Result<termios> {
+pub fn get_terminal_attr() -> Result<Termios> {
     unsafe {
         let mut termios = MaybeUninit::uninit();
         c_result(tcgetattr(STDIN_FILENO, termios.as_mut_ptr()))?;
@@ -14,6 +14,6 @@ pub fn get_terminal_attr() -> Result<termios> {
     }
 }
 
-pub fn set_terminal_attr(termios: &termios) -> Result<()> {
+pub fn set_terminal_attr(termios: &Termios) -> Result<()> {
     unsafe { c_result(tcsetattr(STDIN_FILENO, TCSANOW, termios)).and(Ok(())) }
 }

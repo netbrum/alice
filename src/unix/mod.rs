@@ -2,6 +2,8 @@ pub mod attr;
 pub mod size;
 pub mod tty;
 
+pub use libc::termios as Termios;
+
 use std::io::{Error, Result};
 
 trait IsMinusOne {
