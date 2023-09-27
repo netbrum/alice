@@ -27,6 +27,12 @@ impl TTYReader {
     }
 }
 
+impl Default for TTYReader {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Read for TTYReader {
     fn read(&mut self, buf: &mut [u8]) -> Result<usize> {
         let mut total = 0;
