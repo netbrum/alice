@@ -22,12 +22,12 @@ impl<W: Write> Write for RawTerminal<W> {
     }
 }
 
-pub trait RawMode: Write + Sized {
-    fn raw_mode(self) -> Result<RawTerminal<Self>>;
+pub trait IntoRawMode: Write + Sized {
+    fn into_raw_mode(self) -> Result<RawTerminal<Self>>;
 }
 
-impl<W: Write> RawMode for W {
-    fn raw_mode(self) -> Result<RawTerminal<W>> {
+impl<W: Write> IntoRawMode for W {
+    fn into_raw_mode(self) -> Result<RawTerminal<W>> {
         let mut termios = attr::get_terminal_attr()?;
         let previous = termios;
 
