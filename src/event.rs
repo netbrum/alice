@@ -59,14 +59,9 @@ where
         // The first byte in an escape sequence is always:
         // 0x1b (hexadecimal) / 27 (decimal)
         b'\x1b' => {
-            let byte = iter.next();
-
-            // If there is no next byte, we can assume it's the Escape key
-            if byte.is_none() {
-                return Ok(Event::Key(Key::Escape));
-            }
-
-            let byte = byte.ok_or(Error::new(ErrorKind::Other, PARSE_ERROR))?;
+            let byte = iter
+                .next()
+                .ok_or(Error::new(ErrorKind::Other, PARSE_ERROR))?;
 
             match byte {
                 // A CSI (Control Sequence Introducer)
