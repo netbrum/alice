@@ -126,3 +126,26 @@ impl<R: Read> Iterator for Keys<R> {
         }
     }
 }
+
+pub trait EventIterator: Read + Sized {
+    fn keys(self) -> Keys<Self>;
+    fn events(self) -> RawEvents<Self>;
+}
+
+impl<R: Read> EventIterator for R {
+    fn keys(self) -> Keys<Self> {
+        let inner = RawEvents {
+            source: self,
+            remainder: None,
+        };
+
+        Keys { inner }
+    }
+
+    fn events(self) -> RawEvents<Self> {
+        RawEvents {
+            source: self,
+            remainder: None,
+        }
+    }
+}
