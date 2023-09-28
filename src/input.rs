@@ -109,3 +109,20 @@ impl<R: Read> Iterator for RawEvents<R> {
         }
     }
 }
+
+pub struct Keys<R: Read> {
+    pub inner: RawEvents<R>,
+}
+
+impl<R: Read> Iterator for Keys<R> {
+    type Item = Result<Key>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let event = self.inner.next()?.ok()?;
+
+        match event {
+            Event::Key(k) => Some(Ok(k)),
+            _ => None,
+        }
+    }
+}
