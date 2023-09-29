@@ -12,6 +12,8 @@ impl<W: Write> Drop for AlternateBuffer<W> {
         self.out
             .write_all(DISABLE_ALTERNATE_BUFFER)
             .expect("to disable alternate buffer");
+
+        self.out.flush().expect("flushing DISABLE_ALTERNATE_BUFFER");
     }
 }
 
@@ -32,6 +34,7 @@ pub trait IntoAlternateBuffer: Write + Sized {
 impl<W: Write> IntoAlternateBuffer for W {
     fn into_alternate_buffer(mut self) -> Result<AlternateBuffer<Self>> {
         self.write_all(ENABLE_ALTERNATE_BUFFER)?;
+        self.flush()?;
 
         Ok(AlternateBuffer { out: self })
     }
