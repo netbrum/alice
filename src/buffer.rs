@@ -11,7 +11,7 @@ impl<W: Write> Drop for AlternateBuffer<W> {
     fn drop(&mut self) {
         self.out
             .write_all(DISABLE_ALTERNATE_BUFFER)
-            .expect("to disable alternate buffer");
+            .expect("disabling alternate buffer");
 
         self.out.flush().expect("flushing DISABLE_ALTERNATE_BUFFER");
     }
