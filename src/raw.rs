@@ -8,7 +8,7 @@ pub struct RawTerminal<W: Write> {
 
 impl<W: Write> Drop for RawTerminal<W> {
     fn drop(&mut self) {
-        let _ = attr::set_terminal_attr(&self.previous_termios);
+        _ = attr::set_terminal_attr(&self.previous_termios);
     }
 }
 

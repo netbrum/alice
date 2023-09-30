@@ -9,11 +9,8 @@ pub struct AlternateBuffer<W: Write> {
 
 impl<W: Write> Drop for AlternateBuffer<W> {
     fn drop(&mut self) {
-        self.out
-            .write_all(DISABLE_ALTERNATE_BUFFER)
-            .expect("disabling alternate buffer");
-
-        self.out.flush().expect("flushing DISABLE_ALTERNATE_BUFFER");
+        _ = self.out.write_all(DISABLE_ALTERNATE_BUFFER);
+        _ = self.out.flush();
     }
 }
 
