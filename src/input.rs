@@ -3,18 +3,18 @@ use super::system::tty;
 
 use std::{
     io::{Read, Result},
-    sync::mpsc::{self, channel},
+    sync::mpsc::{self, Receiver},
     thread,
 };
 
 // Input reader for tty, as it runs in a separate thread it won't block
 pub struct TTYReader {
-    reciever: mpsc::Receiver<Result<u8>>,
+    reciever: Receiver<Result<u8>>,
 }
 
 impl TTYReader {
     pub fn new() -> Self {
-        let (sender, reciever) = channel();
+        let (sender, reciever) = mpsc::channel();
 
         thread::spawn(move || {
             for byte in tty::tty().expect("to read /dev/tty").bytes() {
