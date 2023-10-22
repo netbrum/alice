@@ -2,13 +2,15 @@ use super::c_result;
 use libc::{ioctl, winsize, STDIN_FILENO, TIOCGWINSZ};
 use std::{io::Result, mem::MaybeUninit};
 
-// (columns, rows)
 #[derive(Debug)]
-pub struct Size(u16, u16);
+pub struct Size {
+    pub height: u16,
+    pub width: u16,
+}
 
 impl Size {
-    pub fn new(x: u16, y: u16) -> Self {
-        Size(x, y)
+    pub fn new(height: u16, width: u16) -> Self {
+        Size { height, width }
     }
 }
 
@@ -18,7 +20,10 @@ pub fn get_terminal_size() -> Result<Size> {
         c_result(ioctl(STDIN_FILENO, TIOCGWINSZ, size.as_mut_ptr()))?;
         let size = size.assume_init();
 
-        Ok(Size(size.ws_col, size.ws_row))
+        Ok(Size {
+            height: size.ws_col,
+            width: size.ws_row,
+        })
     }
 }
 
@@ -28,6 +33,9 @@ pub fn get_terminal_size_pixels() -> Result<Size> {
         c_result(ioctl(STDIN_FILENO, TIOCGWINSZ, size.as_mut_ptr()))?;
         let size = size.assume_init();
 
-        Ok(Size(size.ws_xpixel, size.ws_ypixel))
+        Ok(Size {
+            height: size.ws_ypixel,
+            width: size.ws_xpixel,
+        })
     }
 }
