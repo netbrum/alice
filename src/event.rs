@@ -1,5 +1,3 @@
-use super::system::size::Size;
-
 use std::io::{Error, ErrorKind, Result};
 
 const CTRL_1_OFFSET: u8 = 0x60;
@@ -11,7 +9,6 @@ const UTF8_ERROR: &str = "Character is not valid UTF-8";
 #[derive(Debug)]
 pub enum Event {
     Key(Key),
-    Mouse(Size),
     Unknown(Vec<u8>),
 }
 
