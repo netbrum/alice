@@ -21,8 +21,8 @@ pub fn get_terminal_size() -> Result<Size> {
         let size = size.assume_init();
 
         Ok(Size {
-            height: size.ws_col,
-            width: size.ws_row,
+            height: size.ws_row,
+            width: size.ws_col,
         })
     }
 }
