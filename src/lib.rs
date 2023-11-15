@@ -5,6 +5,7 @@ mod unix;
 use self::unix as system;
 
 pub mod buffer;
+pub mod editor;
 pub mod event;
 pub mod input;
 pub mod raw;
