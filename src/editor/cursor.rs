@@ -8,12 +8,12 @@ pub enum Direction {
 }
 
 pub struct Cursor {
-    x: u16,
-    y: u16,
+    x: usize,
+    y: usize,
 }
 
 impl Cursor {
-    pub fn new(x: u16, y: u16) -> Self {
+    pub fn new(x: usize, y: usize) -> Self {
         Cursor { x, y }
     }
 
@@ -25,7 +25,7 @@ impl Cursor {
                 }
             }
             Direction::Down => {
-                if self.y < size.height {
+                if self.y < size.height.into() {
                     self.y = self.y.saturating_add(1);
                 }
             }
@@ -35,7 +35,7 @@ impl Cursor {
                 }
             }
             Direction::Right => {
-                if self.x < size.width {
+                if self.x < size.width.into() {
                     self.x = self.x.saturating_add(1);
                 }
             }
