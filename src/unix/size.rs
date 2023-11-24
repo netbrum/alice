@@ -8,12 +8,6 @@ pub struct Size {
     pub width: u16,
 }
 
-impl Size {
-    pub fn new(height: u16, width: u16) -> Self {
-        Size { height, width }
-    }
-}
-
 pub fn get_terminal_size() -> Result<Size> {
     unsafe {
         let mut size: MaybeUninit<winsize> = MaybeUninit::uninit();
