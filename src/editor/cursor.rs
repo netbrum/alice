@@ -17,27 +17,28 @@ impl Cursor {
     pub fn step(&mut self, direction: Direction, size: &Size) {
         match direction {
             Direction::Up => {
-                if self.y > 1 {
-                    self.y = self.y.saturating_sub(1);
-                }
+                self.y = self.y.saturating_sub(1);
             }
             Direction::Down => {
-                if self.y < size.height.into() {
+                if self.y < (size.height - 1).into() {
                     self.y = self.y.saturating_add(1);
                 }
             }
             Direction::Left => {
-                if self.x > 1 {
-                    self.x = self.x.saturating_sub(1);
-                }
+                self.x = self.x.saturating_sub(1);
             }
             Direction::Right => {
-                if self.x < size.width.into() {
+                if self.x < (size.width - 1).into() {
                     self.x = self.x.saturating_add(1);
                 }
             }
         }
 
-        print!("\x1b[{};{}H", self.y, self.x);
+        // The cursor struct is 0 based, while the ANSI escape codes for the cursor are 1 based, so
+        // we transform the values before visually moving the cursor
+        let x = self.x.saturating_add(1);
+        let y = self.y.saturating_add(1);
+
+        print!("\x1b[{};{}H", y, x);
     }
 }
