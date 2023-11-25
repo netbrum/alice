@@ -54,10 +54,24 @@ impl Editor {
     fn handle_key(&mut self, key: Key) {
         match key {
             Key::Ctrl('c') => self.mode = Mode::Exit,
-            Key::Char('k') => self.cursor.step(Direction::Up, &self.size),
-            Key::Char('j') => self.cursor.step(Direction::Down, &self.size),
-            Key::Char('h') => self.cursor.step(Direction::Left, &self.size),
-            Key::Char('l') => self.cursor.step(Direction::Right, &self.size),
+            Key::Char('k' | 'j' | 'h' | 'l') => {
+                let direction = match key {
+                    Key::Char('k') => Direction::Up,
+                    Key::Char('j') => Direction::Down,
+                    Key::Char('h') => Direction::Left,
+                    Key::Char('l') => Direction::Right,
+                    _ => unreachable!(),
+                };
+
+                self.cursor.step(direction, &self.size);
+
+                // The cursor struct is 0 based, while the ANSI escape codes for the cursor is 1
+                // based, so we transform the values before visually moving the cursor
+                let x = self.cursor.x.saturating_add(1);
+                let y = self.cursor.y.saturating_add(1);
+
+                print!("\x1b[{};{}H", y, x);
+            }
             k => print!("{:?}", k),
         }
     }

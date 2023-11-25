@@ -9,8 +9,8 @@ pub enum Direction {
 
 #[derive(Default)]
 pub struct Cursor {
-    x: usize,
-    y: usize,
+    pub x: usize,
+    pub y: usize,
 }
 
 impl Cursor {
@@ -33,12 +33,5 @@ impl Cursor {
                 }
             }
         }
-
-        // The cursor struct is 0 based, while the ANSI escape codes for the cursor are 1 based, so
-        // we transform the values before visually moving the cursor
-        let x = self.x.saturating_add(1);
-        let y = self.y.saturating_add(1);
-
-        print!("\x1b[{};{}H", y, x);
     }
 }
