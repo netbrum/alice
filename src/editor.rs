@@ -30,7 +30,7 @@ impl Editor {
         Ok(Editor {
             mode: Mode::Normal,
             _out,
-            cursor: Cursor::new(0, 0),
+            cursor: Cursor::default(),
             size,
         })
     }

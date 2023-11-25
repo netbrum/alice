@@ -7,16 +7,13 @@ pub enum Direction {
     Right,
 }
 
+#[derive(Default)]
 pub struct Cursor {
     x: usize,
     y: usize,
 }
 
 impl Cursor {
-    pub fn new(x: usize, y: usize) -> Self {
-        Cursor { x, y }
-    }
-
     pub fn step(&mut self, direction: Direction, size: &Size) {
         match direction {
             Direction::Up => {
