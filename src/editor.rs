@@ -1,37 +1,34 @@
 mod cursor;
 mod mode;
+mod terminal;
 
 use cursor::{Cursor, Direction};
 use mode::Mode;
+use terminal::Terminal;
 
-use super::buffer::{AlternateBuffer, IntoAlternateBuffer};
 use super::event::Key;
 use super::input::EventIterator;
-use super::raw::{IntoRawMode, RawTerminal};
-use super::system::size::{self, Size};
+use super::system::size::Size;
 
 use std::{
     env::Args,
-    io::{self, Result, Stdout, Write},
+    io::{self, Result, Write},
 };
 
 pub struct Editor {
     mode: Mode,
-    _out: RawTerminal<AlternateBuffer<Stdout>>,
+    terminal: Terminal,
     cursor: Cursor,
-    size: Size,
 }
 
 impl Editor {
     pub fn new(_args: Args) -> Result<Self> {
-        let _out = io::stdout().into_alternate_buffer()?.into_raw_mode()?;
-        let size = size::get_terminal_size()?;
+        let terminal = Terminal::new()?;
 
         Ok(Editor {
             mode: Mode::Normal,
-            _out,
+            terminal,
             cursor: Cursor::default(),
-            size,
         })
     }
 
@@ -63,7 +60,7 @@ impl Editor {
                     _ => unreachable!(),
                 };
 
-                self.cursor.step(direction, &self.size);
+                self.cursor.step(direction, &self.terminal.size);
 
                 // The cursor struct is 0 based, while the ANSI escape codes for the cursor is 1
                 // based, so we transform the values before visually moving the cursor
