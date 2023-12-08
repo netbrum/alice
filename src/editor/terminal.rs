@@ -1,4 +1,4 @@
-use crate::buffer::{AlternateBuffer, IntoAlternateBuffer};
+use crate::alternate::{AlternateBuffer, IntoAlternateBuffer};
 use crate::raw::{IntoRawMode, RawTerminal};
 use crate::system::size::{self, Size};
 

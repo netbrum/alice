@@ -4,7 +4,7 @@ mod unix;
 #[cfg(unix)]
 use self::unix as system;
 
-pub mod buffer;
+pub mod alternate;
 pub mod editor;
 pub mod event;
 pub mod input;
