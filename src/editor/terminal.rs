@@ -2,7 +2,7 @@ use crate::alternate::{AlternateBuffer, IntoAlternateBuffer};
 use crate::raw::{IntoRawMode, RawTerminal};
 use crate::system::size::{self, Size};
 
-use std::io::{self, Result, Stdout};
+use std::io::{self, Result, Stdout, Write};
 
 pub struct Terminal {
     pub size: Size,
@@ -15,5 +15,9 @@ impl Terminal {
         let size = size::get_terminal_size()?;
 
         Ok(Terminal { size, _out })
+    }
+
+    pub fn flush() {
+        _ = io::stdout().flush();
     }
 }

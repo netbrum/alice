@@ -11,7 +11,7 @@ use super::event::Key;
 use super::input::EventIterator;
 use super::system::size::Size;
 
-use std::io::{self, Result, Write};
+use std::io::{self, Result};
 
 pub struct Editor {
     mode: Mode,
@@ -42,7 +42,7 @@ impl Editor {
                 self.handle_key(key);
             }
 
-            _ = io::stdout().flush();
+            Terminal::flush();
         }
     }
 
