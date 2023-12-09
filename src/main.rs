@@ -1,9 +1,11 @@
-use std::env;
+use clap::Parser;
 
+use alice::arg::Args;
 use alice::editor::Editor;
 
 fn main() {
-    let editor = Editor::new(env::args());
+    let args = Args::parse();
+    let editor = Editor::new(args);
 
     match editor {
         Ok(mut e) => e.run(),

@@ -6,14 +6,12 @@ use cursor::{Cursor, Direction};
 use mode::Mode;
 use terminal::Terminal;
 
+use super::arg::Args;
 use super::event::Key;
 use super::input::EventIterator;
 use super::system::size::Size;
 
-use std::{
-    env::Args,
-    io::{self, Result, Write},
-};
+use std::io::{self, Result, Write};
 
 pub struct Editor {
     mode: Mode,
