@@ -1,8 +1,10 @@
 mod cursor;
+mod document;
 mod mode;
 mod terminal;
 
 use cursor::{Cursor, Direction};
+use document::Document;
 use mode::Mode;
 use terminal::Terminal;
 
@@ -17,17 +19,34 @@ pub struct Editor {
     mode: Mode,
     terminal: Terminal,
     cursor: Cursor,
+    document: Document,
 }
 
 impl Editor {
-    pub fn new(_args: Args) -> Result<Self> {
+    pub fn new(args: Args) -> Result<Self> {
         let terminal = Terminal::new()?;
+        let document = Document::open(&args.path)?;
 
-        Ok(Editor {
+        let editor = Editor {
             mode: Mode::Normal,
             terminal,
             cursor: Cursor::default(),
-        })
+            document,
+        };
+
+        editor.initial_draw();
+
+        Ok(editor)
+    }
+
+    fn initial_draw(&self) {
+        for row in &self.document.rows {
+            print!("{}\r\n", row);
+        }
+
+        print!("\x1b[H");
+
+        Terminal::flush();
     }
 
     pub fn run(&mut self) {
