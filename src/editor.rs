@@ -4,7 +4,7 @@ mod mode;
 mod terminal;
 
 use cursor::{Cursor, Direction};
-use document::Document;
+use document::{Document, Row};
 use mode::Mode;
 use terminal::Terminal;
 
@@ -39,9 +39,16 @@ impl Editor {
         Ok(editor)
     }
 
+    fn draw_row(&self, row: &Row) {
+        let end = self.terminal.size.width as usize;
+        let row = row.render(0, end);
+
+        print!("{}\r\n", row);
+    }
+
     fn initial_draw(&self) {
         for row in &self.document.rows {
-            print!("{}\r\n", row);
+            self.draw_row(row);
         }
 
         print!("\x1b[H");

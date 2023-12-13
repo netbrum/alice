@@ -1,6 +1,6 @@
 pub mod row;
 
-use row::Row;
+pub use row::Row;
 
 use std::{fs, io::Result, path::PathBuf};
 

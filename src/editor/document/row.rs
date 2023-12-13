@@ -5,6 +5,15 @@ pub struct Row {
     buffer: String,
 }
 
+impl Row {
+    pub fn render(&self, start: usize, end: usize) -> &str {
+        let end = end.min(self.buffer.len());
+        let start = start.min(end);
+
+        &self.buffer[start..end]
+    }
+}
+
 impl From<&str> for Row {
     fn from(value: &str) -> Self {
         Row {
