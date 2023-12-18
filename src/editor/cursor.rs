@@ -20,7 +20,7 @@ impl Cursor {
                 self.y = self.y.saturating_sub(1);
             }
             Direction::Down => {
-                if self.y < (size.height - 1).into() {
+                if self.y < (size.height - 1) {
                     self.y = self.y.saturating_add(1);
                 }
             }
@@ -28,7 +28,7 @@ impl Cursor {
                 self.x = self.x.saturating_sub(1);
             }
             Direction::Right => {
-                if self.x < (size.width - 1).into() {
+                if self.x < (size.width - 1) {
                     self.x = self.x.saturating_add(1);
                 }
             }

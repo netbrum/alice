@@ -11,7 +11,6 @@ use terminal::Terminal;
 use super::arg::Args;
 use super::event::Key;
 use super::input::EventIterator;
-use super::system::size::Size;
 
 use std::io::{self, Result};
 
@@ -84,7 +83,11 @@ impl Editor {
                     _ => unreachable!(),
                 };
 
-                self.cursor.step(direction, &self.terminal.size);
+                let size = &self.terminal.size;
+                let height = size.height as usize;
+                let width = size.width as usize;
+
+                self.cursor.step(direction, &Size { height, width });
 
                 // The cursor struct is 0 based, while the ANSI escape codes for the cursor is 1
                 // based, so we transform the values before visually moving the cursor
@@ -96,4 +99,9 @@ impl Editor {
             k => print!("{:?}", k),
         }
     }
+}
+
+struct Size {
+    width: usize,
+    height: usize,
 }

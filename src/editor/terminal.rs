@@ -1,11 +1,11 @@
 use crate::alternate::{AlternateBuffer, IntoAlternateBuffer};
 use crate::raw::{IntoRawMode, RawTerminal};
-use crate::system::size::{self, Size};
+use crate::system::size::{self, TermSize};
 
 use std::io::{self, Result, Stdout, Write};
 
 pub struct Terminal {
-    pub size: Size,
+    pub size: TermSize,
     _out: RawTerminal<AlternateBuffer<Stdout>>,
 }
 
