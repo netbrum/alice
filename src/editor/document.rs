@@ -37,4 +37,8 @@ impl Document {
             }
         }
     }
+
+    pub fn len(&self) -> usize {
+        self.rows.len()
+    }
 }

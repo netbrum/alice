@@ -12,6 +12,10 @@ impl Row {
 
         &self.buffer[start..end]
     }
+
+    pub fn len(&self) -> usize {
+        self.buffer.len()
+    }
 }
 
 impl From<&str> for Row {

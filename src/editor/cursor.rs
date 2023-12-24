@@ -1,4 +1,4 @@
-use super::Size;
+use super::document::Document;
 
 pub enum Direction {
     Up,
@@ -14,13 +14,20 @@ pub struct Cursor {
 }
 
 impl Cursor {
-    pub fn step(&mut self, direction: Direction, size: &Size) {
+    pub fn step(&mut self, direction: Direction, document: &Document) {
+        let height = document.len();
+        let width = document
+            .rows
+            .get(self.y)
+            .expect("row at cursor position should exist")
+            .len();
+
         match direction {
             Direction::Up => {
                 self.y = self.y.saturating_sub(1);
             }
             Direction::Down => {
-                if self.y < (size.height - 1) {
+                if self.y < height.saturating_sub(1) {
                     self.y = self.y.saturating_add(1);
                 }
             }
@@ -28,9 +35,19 @@ impl Cursor {
                 self.x = self.x.saturating_sub(1);
             }
             Direction::Right => {
-                if self.x < (size.width - 1) {
+                if self.x < width.saturating_sub(1) {
                     self.x = self.x.saturating_add(1);
                 }
+            }
+        }
+
+        let row = document.rows.get(self.y);
+
+        if let Some(row) = row {
+            let length = row.len().saturating_sub(1);
+
+            if self.x > length {
+                self.x = length;
             }
         }
     }
