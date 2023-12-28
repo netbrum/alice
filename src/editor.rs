@@ -39,19 +39,57 @@ impl Editor {
     }
 
     fn draw_row(&self, row: &Row) {
-        let end = self.terminal.size.width as usize;
-        let row = row.render(0, end);
+        let start = self.cursor.offset.x;
+        let width = self.terminal.size.width as usize;
+        let end = width + self.cursor.offset.x;
+        let row = row.render(start, end);
 
-        print!("{}\r\n", row);
+        print!("{}\r", row);
     }
 
-    fn initial_draw(&self) {
-        for row in &self.document.rows {
-            self.draw_row(row);
-        }
+    fn draw(&self) {
+        let height = self.terminal.size.height as usize;
 
         print!("\x1b[H");
 
+        for index in 0..height {
+            print!("\x1b[2K");
+
+            let row = self.document.rows.get(index + self.cursor.offset.y);
+
+            if let Some(row) = row {
+                self.draw_row(row);
+
+                if index != height - 1 {
+                    println!();
+                }
+            }
+        }
+    }
+
+    fn initial_draw(&self) {
+        self.draw();
+
+        print!("\x1b[H");
+        Terminal::flush();
+    }
+
+    fn redraw(&self) {
+        self.draw();
+
+        let x = self
+            .cursor
+            .x
+            .saturating_sub(self.cursor.offset.x)
+            .saturating_add(1);
+
+        let y = self
+            .cursor
+            .y
+            .saturating_sub(self.cursor.offset.y)
+            .saturating_add(1);
+
+        print!("\x1b[{};{}H", y, x);
         Terminal::flush();
     }
 
@@ -67,7 +105,8 @@ impl Editor {
                 self.handle_key(key);
             }
 
-            Terminal::flush();
+            self.cursor.scroll(&self.terminal.size);
+            self.redraw();
         }
     }
 
@@ -84,13 +123,6 @@ impl Editor {
                 };
 
                 self.cursor.step(direction, &self.document);
-
-                // The cursor struct is 0 based, while the ANSI escape codes for the cursor is 1
-                // based, so we transform the values before visually moving the cursor
-                let x = self.cursor.x.saturating_add(1);
-                let y = self.cursor.y.saturating_add(1);
-
-                print!("\x1b[{};{}H", y, x);
             }
             k => print!("{:?}", k),
         }
