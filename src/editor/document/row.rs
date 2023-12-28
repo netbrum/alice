@@ -1,8 +1,11 @@
 use std::fmt::Display;
 
+use unicode_segmentation::UnicodeSegmentation;
+
 #[derive(Default)]
 pub struct Row {
     buffer: String,
+    length: usize,
 }
 
 impl Row {
@@ -14,7 +17,7 @@ impl Row {
     }
 
     pub fn len(&self) -> usize {
-        self.buffer.len()
+        self.length
     }
 }
 
@@ -22,6 +25,7 @@ impl From<&str> for Row {
     fn from(value: &str) -> Self {
         Row {
             buffer: value.to_owned(),
+            length: value.graphemes(true).count(),
         }
     }
 }
