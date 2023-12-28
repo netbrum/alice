@@ -19,7 +19,7 @@ impl Document {
                     Err(error)
                 } else {
                     Ok(Document {
-                        rows: Vec::default(),
+                        rows: vec![Row::default()],
                         path: path.to_path_buf(),
                     })
                 }
