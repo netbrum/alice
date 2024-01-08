@@ -1,6 +1,7 @@
 mod cursor;
 mod document;
 mod mode;
+mod position;
 mod terminal;
 
 use cursor::{Cursor, Direction};
@@ -79,12 +80,14 @@ impl Editor {
 
         let x = self
             .cursor
+            .position
             .x
             .saturating_sub(self.cursor.offset.x)
             .saturating_add(1);
 
         let y = self
             .cursor
+            .position
             .y
             .saturating_sub(self.cursor.offset.y)
             .saturating_add(1);
