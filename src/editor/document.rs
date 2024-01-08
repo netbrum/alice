@@ -1,4 +1,4 @@
-pub mod row;
+mod row;
 
 pub use row::Row;
 
