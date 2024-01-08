@@ -1,13 +1,10 @@
-use crate::unix::size::TermSize;
+mod direction;
+
+pub use direction::Direction;
 
 use super::{document::Document, position::Position};
 
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
+use crate::unix::size::TermSize;
 
 #[derive(Default)]
 pub struct Cursor {
