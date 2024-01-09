@@ -9,6 +9,12 @@ pub struct Row {
 }
 
 impl Row {
+    pub fn new(buffer: String) -> Self {
+        let length = buffer.graphemes(true).count();
+
+        Row { buffer, length }
+    }
+
     pub fn render(&self, start: usize, end: usize) -> &str {
         let end = end.min(self.buffer.len());
         let start = start.min(end);
@@ -22,11 +28,8 @@ impl Row {
 }
 
 impl From<&str> for Row {
-    fn from(value: &str) -> Self {
-        Row {
-            buffer: value.to_owned(),
-            length: value.graphemes(true).count(),
-        }
+    fn from(buffer: &str) -> Self {
+        Row::new(buffer.to_owned())
     }
 }
 
