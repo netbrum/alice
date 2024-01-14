@@ -40,6 +40,10 @@ impl Cursor {
             }
         }
 
+        self.overstep(document);
+    }
+
+    pub fn overstep(&mut self, document: &Document) {
         let row = document.rows.get(self.position.y);
 
         if let Some(row) = row {
