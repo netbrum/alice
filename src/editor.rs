@@ -127,6 +127,10 @@ impl Editor {
 
                 self.cursor.step(direction, &self.document);
             }
+            Key::Char(character) => {
+                self.document.insert(&self.cursor.position, character);
+                self.cursor.step(Direction::Right, &self.document);
+            }
             k => print!("{:?}", k),
         }
     }

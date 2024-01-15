@@ -25,6 +25,21 @@ impl Row {
     pub fn len(&self) -> usize {
         self.length
     }
+
+    pub fn update(&mut self) {
+        let length = self.buffer.graphemes(true).count();
+        self.length = length;
+    }
+
+    pub fn insert(&mut self, x: usize, character: char) {
+        let start: String = self.buffer.graphemes(true).take(x).collect();
+        let end: String = self.buffer.graphemes(true).skip(x).collect();
+
+        let new = format!("{start}{character}{end}");
+
+        self.buffer = new;
+        self.update();
+    }
 }
 
 impl From<&str> for Row {
