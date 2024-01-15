@@ -132,6 +132,11 @@ impl Editor {
                 self.document.insert(&self.cursor.position, character);
                 self.cursor.step(Direction::Right, &self.document);
             }
+            Key::Enter => {
+                self.document.newline(&self.cursor.position);
+                self.cursor.step(Direction::Down, &self.document);
+                self.cursor.position.x = 0;
+            }
             Key::Backspace => {
                 let Position { x, y } = self.cursor.position;
 

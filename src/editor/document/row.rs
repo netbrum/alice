@@ -36,6 +36,16 @@ impl Row {
         self.update();
     }
 
+    pub fn split(&mut self, x: usize) -> Self {
+        let start: String = self.buffer.graphemes(true).take(x).collect();
+        let end: String = self.buffer.graphemes(true).skip(x).collect();
+
+        self.buffer = start;
+        self.update();
+
+        Row::from(end.as_str())
+    }
+
     pub fn insert(&mut self, x: usize, character: char) {
         let start: String = self.buffer.graphemes(true).take(x).collect();
         let end: String = self.buffer.graphemes(true).skip(x).collect();

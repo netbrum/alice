@@ -44,13 +44,28 @@ impl Document {
         self.rows.len()
     }
 
-    pub fn insert(&mut self, position: &Position, character: char) {
+    pub fn newline(&mut self, position: &Position) {
         let row = self
             .rows
             .get_mut(position.y)
             .expect("row at cursor position should exist");
 
-        row.insert(position.x, character);
+        let new = row.split(position.x);
+
+        self.rows.insert(position.y.saturating_add(1), new);
+    }
+
+    pub fn insert(&mut self, position: &Position, character: char) {
+        if character == '\n' {
+            self.newline(position);
+        } else {
+            let row = self
+                .rows
+                .get_mut(position.y)
+                .expect("row at cursor position should exist");
+
+            row.insert(position.x, character);
+        }
     }
 
     pub fn delete(&mut self, position: &Position) {
