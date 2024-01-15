@@ -75,4 +75,21 @@ impl Cursor {
             self.offset.x = self.position.x;
         }
     }
+
+    pub fn backspace(&mut self, document: &Document) {
+        if self.position.x > 0 {
+            self.position.x -= 1;
+            return;
+        }
+
+        if self.position.y > 0 {
+            self.position.y -= 1;
+
+            self.position.x = if let Some(row) = document.rows.get(self.position.y) {
+                row.len()
+            } else {
+                0
+            }
+        }
+    }
 }

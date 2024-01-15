@@ -31,6 +31,11 @@ impl Row {
         self.length = length;
     }
 
+    pub fn append(&mut self, buffer: &str) {
+        self.buffer.push_str(buffer);
+        self.update();
+    }
+
     pub fn insert(&mut self, x: usize, character: char) {
         let start: String = self.buffer.graphemes(true).take(x).collect();
         let end: String = self.buffer.graphemes(true).skip(x).collect();
@@ -38,6 +43,14 @@ impl Row {
         let new = format!("{start}{character}{end}");
 
         self.buffer = new;
+        self.update();
+    }
+
+    pub fn delete(&mut self, x: usize) {
+        let start: String = self.buffer.graphemes(true).take(x).collect();
+        let end: String = self.buffer.graphemes(true).skip(x + 1).collect();
+
+        self.buffer = format!("{start}{end}");
         self.update();
     }
 }

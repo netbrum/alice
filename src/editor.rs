@@ -7,6 +7,7 @@ mod terminal;
 use cursor::{Cursor, Direction};
 use document::{Document, Row};
 use mode::Mode;
+use position::Position;
 use terminal::Terminal;
 
 use super::arg::Args;
@@ -130,6 +131,15 @@ impl Editor {
             Key::Char(character) => {
                 self.document.insert(&self.cursor.position, character);
                 self.cursor.step(Direction::Right, &self.document);
+            }
+            Key::Backspace => {
+                let Position { x, y } = self.cursor.position;
+
+                if x > 0 || y > 0 {
+                    self.cursor.backspace(&self.document);
+                    self.document.delete(&self.cursor.position);
+                    self.cursor.overstep(&self.document);
+                }
             }
             k => print!("{:?}", k),
         }
