@@ -10,7 +10,7 @@ fn main() {
     match editor {
         Ok(mut e) => e.run(),
         Err(err) => {
-            eprintln!("{}", err);
+            eprintln!("alice: {}", err.kind());
         }
     }
 }
