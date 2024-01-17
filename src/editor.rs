@@ -11,6 +11,7 @@ use position::Position;
 use terminal::Terminal;
 
 use super::arg::Args;
+use super::escape;
 use super::event::Key;
 use super::input::EventIterator;
 
@@ -52,10 +53,10 @@ impl Editor {
     fn draw(&self) {
         let height = self.terminal.size.height as usize;
 
-        print!("\x1b[H");
+        print!("{}", escape::cursor::Reset);
 
         for index in 0..height {
-            print!("\x1b[2K");
+            print!("{}", escape::clear::EntireLine);
 
             let row = self.document.rows.get(index + self.cursor.offset.y);
 
@@ -72,7 +73,7 @@ impl Editor {
     fn initial_draw(&self) {
         self.draw();
 
-        print!("\x1b[H");
+        print!("{}", escape::cursor::Reset);
         Terminal::flush();
     }
 
@@ -93,7 +94,7 @@ impl Editor {
             .saturating_sub(self.cursor.offset.y)
             .saturating_add(1);
 
-        print!("\x1b[{};{}H", y, x);
+        print!("{}", escape::cursor::Goto(y, x));
         Terminal::flush();
     }
 

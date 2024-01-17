@@ -1,7 +1,6 @@
-use std::io::{Result, Write};
+use super::escape;
 
-const ENABLE_ALTERNATE_BUFFER: &[u8; 8] = b"\x1b[?1049h";
-const DISABLE_ALTERNATE_BUFFER: &[u8; 8] = b"\x1b[?1049l";
+use std::io::{Result, Write};
 
 pub struct AlternateBuffer<W: Write> {
     out: W,
@@ -9,7 +8,9 @@ pub struct AlternateBuffer<W: Write> {
 
 impl<W: Write> Drop for AlternateBuffer<W> {
     fn drop(&mut self) {
-        _ = self.out.write_all(DISABLE_ALTERNATE_BUFFER);
+        let disable = escape::alternate::Disable.to_string();
+
+        _ = self.out.write_all(disable.as_bytes());
         _ = self.out.flush();
     }
 }
@@ -30,7 +31,9 @@ pub trait IntoAlternateBuffer: Write + Sized {
 
 impl<W: Write> IntoAlternateBuffer for W {
     fn into_alternate_buffer(mut self) -> Result<AlternateBuffer<Self>> {
-        self.write_all(ENABLE_ALTERNATE_BUFFER)?;
+        let enable = escape::alternate::Enable.to_string();
+
+        self.write_all(enable.as_bytes())?;
         self.flush()?;
 
         Ok(AlternateBuffer { out: self })
