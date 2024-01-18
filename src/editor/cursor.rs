@@ -22,6 +22,7 @@ impl Cursor {
             .len();
 
         match direction {
+            Direction::None => {}
             Direction::Up => {
                 self.position.y = self.position.y.saturating_sub(1);
             }

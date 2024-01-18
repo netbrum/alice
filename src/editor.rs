@@ -118,17 +118,11 @@ impl Editor {
     fn handle_key(&mut self, key: Key) {
         match key {
             Key::Ctrl('c') => self.mode = Mode::Exit,
-            Key::Char('k' | 'j' | 'h' | 'l') => {
-                let direction = match key {
-                    Key::Char('k') => Direction::Up,
-                    Key::Char('j') => Direction::Down,
-                    Key::Char('h') => Direction::Left,
-                    Key::Char('l') => Direction::Right,
-                    _ => unreachable!(),
-                };
-
-                self.cursor.step(direction, &self.document);
-            }
+            Key::Char('h' | 'j' | 'k' | 'l')
+            | Key::ArrowLeft
+            | Key::ArrowDown
+            | Key::ArrowUp
+            | Key::ArrowRight => self.cursor.step(Direction::from(key), &self.document),
             Key::Char(character) => {
                 self.document.insert(&self.cursor.position, character);
                 self.cursor.step(Direction::Right, &self.document);
