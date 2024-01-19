@@ -4,40 +4,30 @@ pub use row::Row;
 
 use super::position::Position;
 
-use std::{fs, io::Result, path::PathBuf};
+use std::{
+    fs::File,
+    io::{Read, Result},
+    path::PathBuf,
+};
 
 pub struct Buffer {
     pub rows: Vec<Row>,
-    path: PathBuf,
+    path: Option<PathBuf>,
 }
 
 impl Buffer {
     pub fn from_file(path: &PathBuf) -> Result<Self> {
-        let buffer = fs::read(path);
+        let mut file = File::open(path)?;
 
-        match buffer {
-            Err(error) => {
-                if path.exists() {
-                    Err(error)
-                } else {
-                    Ok(Buffer {
-                        rows: vec![Row::default()],
-                        path: path.to_path_buf(),
-                    })
-                }
-            }
-            Ok(contents) => {
-                let rows = String::from_utf8_lossy(&contents)
-                    .lines()
-                    .map(Row::from)
-                    .collect();
+        let mut data = String::new();
+        file.read_to_string(&mut data)?;
 
-                Ok(Buffer {
-                    rows,
-                    path: path.to_path_buf(),
-                })
-            }
-        }
+        let rows = data.lines().map(Row::from).collect();
+
+        Ok(Buffer {
+            rows,
+            path: Some(path.canonicalize()?),
+        })
     }
 
     pub fn len(&self) -> usize {
