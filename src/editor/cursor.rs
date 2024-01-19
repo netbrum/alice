@@ -2,7 +2,7 @@ mod direction;
 
 pub use direction::Direction;
 
-use super::{document::Document, position::Position};
+use super::{Buffer, Position};
 
 use crate::unix::size::TermSize;
 
@@ -13,8 +13,8 @@ pub struct Cursor {
 }
 
 impl Cursor {
-    pub fn step(&mut self, direction: Direction, document: &Document) {
-        let height = document.len();
+    pub fn step(&mut self, direction: Direction, buffer: &Buffer) {
+        let height = buffer.len();
 
         match direction {
             Direction::None => {}
@@ -30,7 +30,7 @@ impl Cursor {
                 self.position.x = self.position.x.saturating_sub(1);
             }
             Direction::Right => {
-                let row = document
+                let row = buffer
                     .rows
                     .get(self.position.y)
                     .expect("row at cursor position should exist");
@@ -43,11 +43,11 @@ impl Cursor {
             }
         }
 
-        self.overstep(document);
+        self.overstep(buffer);
     }
 
-    pub fn overstep(&mut self, document: &Document) {
-        let row = document
+    pub fn overstep(&mut self, buffer: &Buffer) {
+        let row = buffer
             .rows
             .get(self.position.y)
             .expect("row at cursor position should exist");
@@ -80,7 +80,7 @@ impl Cursor {
         }
     }
 
-    pub fn backspace(&mut self, document: &Document) {
+    pub fn backspace(&mut self, buffer: &Buffer) {
         if self.position.x > 0 {
             self.position.x -= 1;
             return;
@@ -89,7 +89,7 @@ impl Cursor {
         if self.position.y > 0 {
             self.position.y -= 1;
 
-            let row = document.rows.get(self.position.y);
+            let row = buffer.rows.get(self.position.y);
             self.position.x = if let Some(row) = row { row.len() } else { 0 };
         }
     }

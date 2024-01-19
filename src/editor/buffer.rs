@@ -6,13 +6,13 @@ use super::position::Position;
 
 use std::{fs, io::Result, path::PathBuf};
 
-pub struct Document {
+pub struct Buffer {
     pub rows: Vec<Row>,
     path: PathBuf,
 }
 
-impl Document {
-    pub fn open(path: &PathBuf) -> Result<Self> {
+impl Buffer {
+    pub fn from_file(path: &PathBuf) -> Result<Self> {
         let buffer = fs::read(path);
 
         match buffer {
@@ -20,7 +20,7 @@ impl Document {
                 if path.exists() {
                     Err(error)
                 } else {
-                    Ok(Document {
+                    Ok(Buffer {
                         rows: vec![Row::default()],
                         path: path.to_path_buf(),
                     })
@@ -32,7 +32,7 @@ impl Document {
                     .map(Row::from)
                     .collect();
 
-                Ok(Document {
+                Ok(Buffer {
                     rows,
                     path: path.to_path_buf(),
                 })

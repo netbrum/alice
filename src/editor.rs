@@ -1,11 +1,11 @@
+mod buffer;
 mod cursor;
-mod document;
 mod mode;
 mod position;
 mod terminal;
 
+use buffer::{Buffer, Row};
 use cursor::{Cursor, Direction};
-use document::{Document, Row};
 use mode::Mode;
 use position::Position;
 use terminal::Terminal;
@@ -21,19 +21,19 @@ pub struct Editor {
     mode: Mode,
     terminal: Terminal,
     cursor: Cursor,
-    document: Document,
+    buffer: Buffer,
 }
 
 impl Editor {
     pub fn new(args: Args) -> Result<Self> {
         let terminal = Terminal::new()?;
-        let document = Document::open(&args.path)?;
+        let buffer = Buffer::from_file(&args.path)?;
 
         let editor = Editor {
             mode: Mode::Normal,
             terminal,
             cursor: Cursor::default(),
-            document,
+            buffer,
         };
 
         editor.initial_draw();
@@ -58,7 +58,7 @@ impl Editor {
         for index in 0..height {
             print!("{}", escape::clear::EntireLine);
 
-            let row = self.document.rows.get(index + self.cursor.offset.y);
+            let row = self.buffer.rows.get(index + self.cursor.offset.y);
 
             if let Some(row) = row {
                 self.draw_row(row);
@@ -122,23 +122,23 @@ impl Editor {
             | Key::ArrowLeft
             | Key::ArrowDown
             | Key::ArrowUp
-            | Key::ArrowRight => self.cursor.step(Direction::from(key), &self.document),
+            | Key::ArrowRight => self.cursor.step(Direction::from(key), &self.buffer),
             Key::Char(character) => {
-                self.document.insert(&self.cursor.position, character);
-                self.cursor.step(Direction::Right, &self.document);
+                self.buffer.insert(&self.cursor.position, character);
+                self.cursor.step(Direction::Right, &self.buffer);
             }
             Key::Enter => {
-                self.document.newline(&self.cursor.position);
-                self.cursor.step(Direction::Down, &self.document);
+                self.buffer.newline(&self.cursor.position);
+                self.cursor.step(Direction::Down, &self.buffer);
                 self.cursor.position.x = 0;
             }
             Key::Backspace => {
                 let Position { x, y } = self.cursor.position;
 
                 if x > 0 || y > 0 {
-                    self.cursor.backspace(&self.document);
-                    self.document.delete(&self.cursor.position);
-                    self.cursor.overstep(&self.document);
+                    self.cursor.backspace(&self.buffer);
+                    self.buffer.delete(&self.cursor.position);
+                    self.cursor.overstep(&self.buffer);
                 }
             }
             k => print!("{:?}", k),
