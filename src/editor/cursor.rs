@@ -15,11 +15,6 @@ pub struct Cursor {
 impl Cursor {
     pub fn step(&mut self, direction: Direction, document: &Document) {
         let height = document.len();
-        let width = document
-            .rows
-            .get(self.position.y)
-            .expect("row at cursor position should exist")
-            .len();
 
         match direction {
             Direction::None => {}
@@ -35,7 +30,14 @@ impl Cursor {
                 self.position.x = self.position.x.saturating_sub(1);
             }
             Direction::Right => {
-                if self.position.x < width.saturating_sub(1) {
+                let row = document
+                    .rows
+                    .get(self.position.y)
+                    .expect("row at cursor position should exist");
+
+                let length = row.len().saturating_sub(1);
+
+                if self.position.x < length {
                     self.position.x = self.position.x.saturating_add(1);
                 }
             }
@@ -45,14 +47,15 @@ impl Cursor {
     }
 
     pub fn overstep(&mut self, document: &Document) {
-        let row = document.rows.get(self.position.y);
+        let row = document
+            .rows
+            .get(self.position.y)
+            .expect("row at cursor position should exist");
 
-        if let Some(row) = row {
-            let length = row.len().saturating_sub(1);
+        let length = row.len().saturating_sub(1);
 
-            if self.position.x > length {
-                self.position.x = length;
-            }
+        if self.position.x > length {
+            self.position.x = length;
         }
     }
 
@@ -86,11 +89,8 @@ impl Cursor {
         if self.position.y > 0 {
             self.position.y -= 1;
 
-            self.position.x = if let Some(row) = document.rows.get(self.position.y) {
-                row.len()
-            } else {
-                0
-            }
+            let row = document.rows.get(self.position.y);
+            self.position.x = if let Some(row) = row { row.len() } else { 0 };
         }
     }
 }
