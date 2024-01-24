@@ -24,7 +24,7 @@ impl TTYReader {
             }
         });
 
-        TTYReader { reciever }
+        Self { reciever }
     }
 }
 

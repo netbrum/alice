@@ -9,3 +9,6 @@ edition = "2021"
 clap = { version = "4.4.11", features = ["derive"] }
 libc = "0.2"
 unicode-segmentation = "1.10.1"
+
+[lints.clippy]
+use_self = "warn"

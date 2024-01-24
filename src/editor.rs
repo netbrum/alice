@@ -29,7 +29,7 @@ impl Editor {
         let terminal = Terminal::new()?;
         let buffer = Buffer::from_file(&args.path)?;
 
-        let editor = Editor {
+        let editor = Self {
             mode: Mode::Normal,
             terminal,
             cursor: Cursor::default(),

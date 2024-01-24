@@ -12,7 +12,7 @@ impl Row {
     pub fn new(data: String) -> Self {
         let length = data.graphemes(true).count();
 
-        Row { data, length }
+        Self { data, length }
     }
 
     pub fn render(&self, start: usize, end: usize) -> &str {
@@ -43,7 +43,7 @@ impl Row {
         self.data = start;
         self.update();
 
-        Row::from(end.as_str())
+        Self::from(end.as_str())
     }
 
     pub fn insert(&mut self, x: usize, character: char) {
@@ -67,7 +67,7 @@ impl Row {
 
 impl From<&str> for Row {
     fn from(buffer: &str) -> Self {
-        Row::new(buffer.to_owned())
+        Self::new(buffer.to_owned())
     }
 }
 

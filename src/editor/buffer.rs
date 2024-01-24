@@ -24,7 +24,7 @@ impl Buffer {
 
         let rows = data.lines().map(Row::from).collect();
 
-        Ok(Buffer {
+        Ok(Self {
             rows,
             path: Some(path.canonicalize()?),
         })

@@ -14,7 +14,7 @@ impl Terminal {
         let _out = io::stdout().into_alternate_buffer()?.into_raw_mode()?;
         let size = size::get_terminal_size()?;
 
-        Ok(Terminal { size, _out })
+        Ok(Self { size, _out })
     }
 
     pub fn flush() {

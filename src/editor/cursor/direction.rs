@@ -11,15 +11,15 @@ pub enum Direction {
 impl From<Key> for Direction {
     fn from(key: Key) -> Self {
         match key {
-            Key::Char('h') => Direction::Left,
-            Key::Char('j') => Direction::Down,
-            Key::Char('k') => Direction::Up,
-            Key::Char('l') => Direction::Right,
-            Key::ArrowLeft => Direction::Left,
-            Key::ArrowDown => Direction::Down,
-            Key::ArrowUp => Direction::Up,
-            Key::ArrowRight => Direction::Right,
-            _ => Direction::None,
+            Key::Char('h') => Self::Left,
+            Key::Char('j') => Self::Down,
+            Key::Char('k') => Self::Up,
+            Key::Char('l') => Self::Right,
+            Key::ArrowLeft => Self::Left,
+            Key::ArrowDown => Self::Down,
+            Key::ArrowUp => Self::Up,
+            Key::ArrowRight => Self::Right,
+            _ => Self::None,
         }
     }
 }
