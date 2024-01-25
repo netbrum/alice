@@ -1,7 +1,7 @@
+pub mod cursor;
 pub mod line;
 
-use super::Position;
-
+use cursor::Cursor;
 use line::Line;
 
 use std::{
@@ -13,6 +13,7 @@ use std::{
 };
 
 pub struct Buffer {
+    pub cursor: Cursor,
     data: Rc<RefCell<Vec<Line>>>,
     path: Option<PathBuf>,
 }
@@ -27,42 +28,40 @@ impl Buffer {
         let lines = data.lines().map(Line::from).collect();
 
         let data = Rc::new(RefCell::new(lines));
+        let cursor = Cursor::new(Rc::clone(&data));
         let path = Some(path.canonicalize()?);
 
-        Ok(Self { data, path })
-    }
-
-    pub fn data_pointer(&self) -> Rc<RefCell<Vec<Line>>> {
-        Rc::clone(&self.data)
+        Ok(Self { data, cursor, path })
     }
 
     pub fn data(&self) -> Ref<'_, Vec<Line>> {
         self.data.borrow()
     }
 
-    pub fn newline(&self, position: &Position) {
+    pub fn newline(&self) {
         let mut lines = self.data.borrow_mut();
 
-        if let Some(line) = lines.get_mut(position.y) {
-            let new = line.split(position.x);
+        if let Some(line) = lines.get_mut(self.cursor.position.y) {
+            let new = line.split(self.cursor.position.x);
 
-            lines.insert(position.y.saturating_add(1), new)
+            lines.insert(self.cursor.position.y.saturating_add(1), new)
         }
     }
 
-    pub fn insert(&mut self, position: &Position, character: char) {
+    pub fn insert(&mut self, character: char) {
         let mut lines = self.data.borrow_mut();
 
         if character == '\n' {
-            self.newline(position);
-        } else if let Some(line) = lines.get_mut(position.y) {
-            line.insert(position.x, character);
+            self.newline();
+        } else if let Some(line) = lines.get_mut(self.cursor.position.y) {
+            line.insert(self.cursor.position.x, character);
         }
     }
 
-    pub fn delete(&mut self, position: &Position) {
+    pub fn delete(&mut self) {
         let mut lines = self.data.borrow_mut();
 
+        let position = self.cursor.position;
         let length = lines.len();
 
         if let Some(line) = lines.get_mut(position.y) {

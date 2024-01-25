@@ -1,5 +1,4 @@
 mod buffer;
-mod cursor;
 mod mode;
 mod position;
 mod terminal;
@@ -9,8 +8,7 @@ use super::escape;
 use super::event::Key;
 use super::input::EventIterator;
 
-use buffer::{line::Line, Buffer};
-use cursor::{Cursor, Direction};
+use buffer::{cursor::Direction, line::Line, Buffer};
 use mode::Mode;
 use position::Position;
 use terminal::Terminal;
@@ -20,25 +18,20 @@ use std::io::{self, Result};
 pub struct Editor {
     terminal: Terminal,
     buffer: Buffer,
-    cursor: Cursor,
     mode: Mode,
 }
 
 impl Editor {
     pub fn new(args: Args) -> Result<Self> {
-        let buffer = Buffer::from_file(&args.path)?;
-        let cursor = Cursor::new(buffer.data_pointer());
-
         Ok(Self {
             terminal: Terminal::new()?,
-            buffer,
-            cursor,
+            buffer: Buffer::from_file(&args.path)?,
             mode: Mode::Normal,
         })
     }
 
     fn draw_line(&self, line: &Line) {
-        let start = self.cursor.offset.x;
+        let start = self.buffer.cursor.offset.x;
         let width = self.terminal.size.width as usize;
         let end = width + start;
 
@@ -50,7 +43,7 @@ impl Editor {
         print!("{}", escape::cursor::Reset);
 
         let height = self.terminal.size.height as usize;
-        let offset = self.cursor.offset.y;
+        let offset = self.buffer.cursor.offset.y;
 
         let lines = self.buffer.data();
 
@@ -77,8 +70,8 @@ impl Editor {
     fn redraw(&self) {
         self.draw();
 
-        let position = &self.cursor.position;
-        let offset = &self.cursor.offset;
+        let position = &self.buffer.cursor.position;
+        let offset = &self.buffer.cursor.offset;
 
         let y = position.y.saturating_sub(offset.y).saturating_add(1);
         let x = position.x.saturating_sub(offset.x).saturating_add(1);
@@ -101,7 +94,7 @@ impl Editor {
                 self.handle_key(key);
             }
 
-            self.cursor.scroll(&self.terminal.size);
+            self.buffer.cursor.scroll(&self.terminal.size);
             self.redraw();
         }
     }
@@ -113,23 +106,23 @@ impl Editor {
             | Key::ArrowLeft
             | Key::ArrowDown
             | Key::ArrowUp
-            | Key::ArrowRight => self.cursor.step(Direction::from(key)),
+            | Key::ArrowRight => self.buffer.cursor.step(Direction::from(key)),
             Key::Char(character) => {
-                self.buffer.insert(&self.cursor.position, character);
-                self.cursor.step(Direction::Right);
+                self.buffer.insert(character);
+                self.buffer.cursor.step(Direction::Right);
             }
             Key::Enter => {
-                self.buffer.newline(&self.cursor.position);
-                self.cursor.step(Direction::Down);
-                self.cursor.position.x = 0;
+                self.buffer.newline();
+                self.buffer.cursor.step(Direction::Down);
+                self.buffer.cursor.position.x = 0;
             }
             Key::Backspace => {
-                let Position { x, y } = self.cursor.position;
+                let Position { x, y } = self.buffer.cursor.position;
 
                 if x > 0 || y > 0 {
-                    self.cursor.backspace();
-                    self.buffer.delete(&self.cursor.position);
-                    self.cursor.overstep();
+                    self.buffer.cursor.backspace();
+                    self.buffer.delete();
+                    self.buffer.cursor.overstep();
                 }
             }
             k => print!("{:?}", k),
