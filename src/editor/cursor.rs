@@ -1,23 +1,47 @@
 mod direction;
 
-pub use direction::Direction;
+use super::Line;
 
-use super::{Buffer, Position};
-
+use crate::editor::Position;
 use crate::unix::size::TermSize;
 
-#[derive(Default)]
+pub use direction::Direction;
+
+use std::{cell::RefCell, rc::Rc};
+
 pub struct Cursor {
     pub position: Position,
     pub offset: Position,
+    data: Rc<RefCell<Vec<Line>>>,
 }
 
 impl Cursor {
-    pub fn step(&mut self, direction: Direction, buffer: &Buffer) {
-        let height = buffer.len();
+    pub fn new(data: Rc<RefCell<Vec<Line>>>) -> Self {
+        Self {
+            position: Position::default(),
+            offset: Position::default(),
+            data,
+        }
+    }
+
+    fn size(&self) -> (usize, usize) {
+        let data = self.data.borrow();
+
+        let height = data.len();
+        let length = if let Some(line) = data.get(self.position.y) {
+            line.len()
+        } else {
+            0
+        };
+
+        (height, length)
+    }
+
+    pub fn step(&mut self, direction: Direction) {
+        let (height, length) = self.size();
 
         match direction {
-            Direction::None => {}
+            Direction::None => (),
             Direction::Up => {
                 self.position.y = self.position.y.saturating_sub(1);
             }
@@ -30,29 +54,17 @@ impl Cursor {
                 self.position.x = self.position.x.saturating_sub(1);
             }
             Direction::Right => {
-                let line = buffer
-                    .lines
-                    .get(self.position.y)
-                    .expect("line at cursor position should exist");
-
-                let length = line.len().saturating_sub(1);
-
                 if self.position.x < length {
                     self.position.x = self.position.x.saturating_add(1);
                 }
             }
         }
 
-        self.overstep(buffer);
+        self.overstep();
     }
 
-    pub fn overstep(&mut self, buffer: &Buffer) {
-        let line = buffer
-            .lines
-            .get(self.position.y)
-            .expect("line at cursor position should exist");
-
-        let length = line.len().saturating_sub(1);
+    pub fn overstep(&mut self) {
+        let (_, length) = self.size();
 
         if self.position.x > length {
             self.position.x = length;
@@ -80,17 +92,14 @@ impl Cursor {
         }
     }
 
-    pub fn backspace(&mut self, buffer: &Buffer) {
+    pub fn backspace(&mut self) {
         if self.position.x > 0 {
             self.position.x -= 1;
-            return;
-        }
-
-        if self.position.y > 0 {
+        } else if self.position.y > 0 {
             self.position.y -= 1;
 
-            let line = buffer.lines.get(self.position.y);
-            self.position.x = if let Some(line) = line { line.len() } else { 0 };
+            let (_, length) = self.size();
+            self.position.x = length;
         }
     }
 }

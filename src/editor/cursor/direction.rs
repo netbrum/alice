@@ -2,9 +2,9 @@ use crate::event::Key;
 
 pub enum Direction {
     None,
-    Up,
-    Down,
     Left,
+    Down,
+    Up,
     Right,
 }
 

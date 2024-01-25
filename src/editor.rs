@@ -4,41 +4,37 @@ mod mode;
 mod position;
 mod terminal;
 
-use buffer::{Buffer, Line};
-use cursor::{Cursor, Direction};
-use mode::Mode;
-use position::Position;
-use terminal::Terminal;
-
 use super::arg::Args;
 use super::escape;
 use super::event::Key;
 use super::input::EventIterator;
 
+use buffer::{line::Line, Buffer};
+use cursor::{Cursor, Direction};
+use mode::Mode;
+use position::Position;
+use terminal::Terminal;
+
 use std::io::{self, Result};
 
 pub struct Editor {
-    mode: Mode,
     terminal: Terminal,
-    cursor: Cursor,
     buffer: Buffer,
+    cursor: Cursor,
+    mode: Mode,
 }
 
 impl Editor {
     pub fn new(args: Args) -> Result<Self> {
-        let terminal = Terminal::new()?;
         let buffer = Buffer::from_file(&args.path)?;
+        let cursor = Cursor::new(buffer.data_pointer());
 
-        let editor = Self {
-            mode: Mode::Normal,
-            terminal,
-            cursor: Cursor::default(),
+        Ok(Self {
+            terminal: Terminal::new()?,
             buffer,
-        };
-
-        editor.initial_draw();
-
-        Ok(editor)
+            cursor,
+            mode: Mode::Normal,
+        })
     }
 
     fn draw_line(&self, line: &Line) {
@@ -51,16 +47,17 @@ impl Editor {
     }
 
     fn draw(&self) {
-        let height = self.terminal.size.height as usize;
-
         print!("{}", escape::cursor::Reset);
+
+        let height = self.terminal.size.height as usize;
+        let offset = self.cursor.offset.y;
+
+        let lines = self.buffer.data();
 
         for index in 0..height {
             print!("{}", escape::clear::EntireLine);
 
-            let line = self.buffer.lines.get(index + self.cursor.offset.y);
-
-            if let Some(line) = line {
+            if let Some(line) = lines.get(offset + index) {
                 self.draw_line(line);
 
                 if index != height - 1 {
@@ -80,33 +77,27 @@ impl Editor {
     fn redraw(&self) {
         self.draw();
 
-        let x = self
-            .cursor
-            .position
-            .x
-            .saturating_sub(self.cursor.offset.x)
-            .saturating_add(1);
+        let position = &self.cursor.position;
+        let offset = &self.cursor.offset;
 
-        let y = self
-            .cursor
-            .position
-            .y
-            .saturating_sub(self.cursor.offset.y)
-            .saturating_add(1);
+        let y = position.y.saturating_sub(offset.y).saturating_add(1);
+        let x = position.x.saturating_sub(offset.x).saturating_add(1);
 
         print!("{}", escape::cursor::Goto(y, x));
         Terminal::flush();
     }
 
     pub fn run(&mut self) {
-        let mut stdin = io::stdin().lock().keys();
+        self.initial_draw();
+
+        let mut keys = io::stdin().lock().keys();
 
         loop {
             if self.mode == Mode::Exit {
                 break;
             }
 
-            if let Some(Ok(key)) = stdin.next() {
+            if let Some(Ok(key)) = keys.next() {
                 self.handle_key(key);
             }
 
@@ -122,23 +113,23 @@ impl Editor {
             | Key::ArrowLeft
             | Key::ArrowDown
             | Key::ArrowUp
-            | Key::ArrowRight => self.cursor.step(Direction::from(key), &self.buffer),
+            | Key::ArrowRight => self.cursor.step(Direction::from(key)),
             Key::Char(character) => {
                 self.buffer.insert(&self.cursor.position, character);
-                self.cursor.step(Direction::Right, &self.buffer);
+                self.cursor.step(Direction::Right);
             }
             Key::Enter => {
                 self.buffer.newline(&self.cursor.position);
-                self.cursor.step(Direction::Down, &self.buffer);
+                self.cursor.step(Direction::Down);
                 self.cursor.position.x = 0;
             }
             Key::Backspace => {
                 let Position { x, y } = self.cursor.position;
 
                 if x > 0 || y > 0 {
-                    self.cursor.backspace(&self.buffer);
+                    self.cursor.backspace();
                     self.buffer.delete(&self.cursor.position);
-                    self.cursor.overstep(&self.buffer);
+                    self.cursor.overstep();
                 }
             }
             k => print!("{:?}", k),

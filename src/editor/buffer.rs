@@ -1,78 +1,79 @@
-mod line;
+pub mod line;
 
-pub use line::Line;
+use super::Position;
 
-use super::position::Position;
+use line::Line;
 
 use std::{
+    cell::{Ref, RefCell},
     fs::File,
     io::{Read, Result},
     path::PathBuf,
+    rc::Rc,
 };
 
 pub struct Buffer {
-    pub lines: Vec<Line>,
+    data: Rc<RefCell<Vec<Line>>>,
     path: Option<PathBuf>,
 }
 
 impl Buffer {
     pub fn from_file(path: &PathBuf) -> Result<Self> {
         let mut file = File::open(path)?;
-
         let mut data = String::new();
+
         file.read_to_string(&mut data)?;
 
         let lines = data.lines().map(Line::from).collect();
 
-        Ok(Self {
-            lines,
-            path: Some(path.canonicalize()?),
-        })
+        let data = Rc::new(RefCell::new(lines));
+        let path = Some(path.canonicalize()?);
+
+        Ok(Self { data, path })
     }
 
-    pub fn len(&self) -> usize {
-        self.lines.len()
+    pub fn data_pointer(&self) -> Rc<RefCell<Vec<Line>>> {
+        Rc::clone(&self.data)
     }
 
-    pub fn newline(&mut self, position: &Position) {
-        let line = self
-            .lines
-            .get_mut(position.y)
-            .expect("line at cursor position should exist");
+    pub fn data(&self) -> Ref<'_, Vec<Line>> {
+        self.data.borrow()
+    }
 
-        let new = line.split(position.x);
+    pub fn newline(&self, position: &Position) {
+        let mut lines = self.data.borrow_mut();
 
-        self.lines.insert(position.y.saturating_add(1), new);
+        if let Some(line) = lines.get_mut(position.y) {
+            let new = line.split(position.x);
+
+            lines.insert(position.y.saturating_add(1), new)
+        }
     }
 
     pub fn insert(&mut self, position: &Position, character: char) {
+        let mut lines = self.data.borrow_mut();
+
         if character == '\n' {
             self.newline(position);
-        } else {
-            let line = self
-                .lines
-                .get_mut(position.y)
-                .expect("line at cursor position should exist");
-
+        } else if let Some(line) = lines.get_mut(position.y) {
             line.insert(position.x, character);
         }
     }
 
     pub fn delete(&mut self, position: &Position) {
-        let length = self.len();
+        let mut lines = self.data.borrow_mut();
 
-        let line = self
-            .lines
-            .get_mut(position.y)
-            .expect("line at cursor position should exist");
+        let length = lines.len();
 
-        // Since the position struct is zero based, we know to combine the lines whenever the x
-        // position is the same as the line length, which is one to the right of the line
-        if position.x == line.len() && position.y.saturating_add(1) < length {
-            let next = self.lines.remove(position.y.saturating_add(1));
-            self.lines[position.y].append(&next.to_string());
-        } else {
-            line.delete(position.x);
+        if let Some(line) = lines.get_mut(position.y) {
+            // Since the position struct is zero based, we know to combine the lines whenever the x
+            // position is the same as the line length, which is one to the right of the line
+            if position.x == line.len() && position.y.saturating_add(1) < length {
+                let next = lines.remove(position.y.saturating_add(1));
+                lines[position.y].append(&next.to_string());
+            } else {
+                line.delete(position.x);
+            }
         }
     }
 }
