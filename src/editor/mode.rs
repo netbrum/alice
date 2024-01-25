@@ -2,4 +2,5 @@
 pub enum Mode {
     Exit,
     Normal,
+    Insert,
 }

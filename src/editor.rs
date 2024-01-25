@@ -101,6 +101,14 @@ impl Editor {
             | Key::ArrowDown
             | Key::ArrowUp
             | Key::ArrowRight => self.buffer.cursor.step(Direction::from(key)),
+            Key::Escape => {
+                self.mode = Mode::Normal;
+                self.buffer.cursor.step(Direction::Left);
+            }
+            Key::Char('i') => {
+                self.mode = Mode::Insert;
+                self.buffer.cursor.step(Direction::Right);
+            }
             Key::Char(character) => {
                 self.buffer.insert(character);
                 self.buffer.cursor.step(Direction::Right);
