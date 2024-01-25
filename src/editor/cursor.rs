@@ -30,12 +30,12 @@ impl Cursor {
                 self.position.x = self.position.x.saturating_sub(1);
             }
             Direction::Right => {
-                let row = buffer
-                    .rows
+                let line = buffer
+                    .lines
                     .get(self.position.y)
-                    .expect("row at cursor position should exist");
+                    .expect("line at cursor position should exist");
 
-                let length = row.len().saturating_sub(1);
+                let length = line.len().saturating_sub(1);
 
                 if self.position.x < length {
                     self.position.x = self.position.x.saturating_add(1);
@@ -47,12 +47,12 @@ impl Cursor {
     }
 
     pub fn overstep(&mut self, buffer: &Buffer) {
-        let row = buffer
-            .rows
+        let line = buffer
+            .lines
             .get(self.position.y)
-            .expect("row at cursor position should exist");
+            .expect("line at cursor position should exist");
 
-        let length = row.len().saturating_sub(1);
+        let length = line.len().saturating_sub(1);
 
         if self.position.x > length {
             self.position.x = length;
@@ -89,8 +89,8 @@ impl Cursor {
         if self.position.y > 0 {
             self.position.y -= 1;
 
-            let row = buffer.rows.get(self.position.y);
-            self.position.x = if let Some(row) = row { row.len() } else { 0 };
+            let line = buffer.lines.get(self.position.y);
+            self.position.x = if let Some(line) = line { line.len() } else { 0 };
         }
     }
 }

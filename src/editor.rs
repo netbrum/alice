@@ -4,7 +4,7 @@ mod mode;
 mod position;
 mod terminal;
 
-use buffer::{Buffer, Row};
+use buffer::{Buffer, Line};
 use cursor::{Cursor, Direction};
 use mode::Mode;
 use position::Position;
@@ -41,13 +41,13 @@ impl Editor {
         Ok(editor)
     }
 
-    fn draw_row(&self, row: &Row) {
+    fn draw_line(&self, line: &Line) {
         let start = self.cursor.offset.x;
         let width = self.terminal.size.width as usize;
         let end = width + self.cursor.offset.x;
-        let row = row.render(start, end);
+        let line = line.render(start, end);
 
-        print!("{}\r", row);
+        print!("{}\r", line);
     }
 
     fn draw(&self) {
@@ -58,10 +58,10 @@ impl Editor {
         for index in 0..height {
             print!("{}", escape::clear::EntireLine);
 
-            let row = self.buffer.rows.get(index + self.cursor.offset.y);
+            let line = self.buffer.lines.get(index + self.cursor.offset.y);
 
-            if let Some(row) = row {
-                self.draw_row(row);
+            if let Some(line) = line {
+                self.draw_line(line);
 
                 if index != height - 1 {
                     println!();

@@ -3,12 +3,12 @@ use std::fmt::Display;
 use unicode_segmentation::UnicodeSegmentation;
 
 #[derive(Default)]
-pub struct Row {
+pub struct Line {
     data: String,
     length: usize,
 }
 
-impl Row {
+impl Line {
     pub fn new(data: String) -> Self {
         let length = data.graphemes(true).count();
 
@@ -65,13 +65,13 @@ impl Row {
     }
 }
 
-impl From<&str> for Row {
-    fn from(buffer: &str) -> Self {
-        Self::new(buffer.to_owned())
+impl From<&str> for Line {
+    fn from(data: &str) -> Self {
+        Self::new(data.to_owned())
     }
 }
 
-impl Display for Row {
+impl Display for Line {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.data)
     }
