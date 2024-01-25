@@ -40,10 +40,10 @@ impl Editor {
     fn draw_line(&self, line: &Line) {
         let start = self.cursor.offset.x;
         let width = self.terminal.size.width as usize;
-        let end = width + self.cursor.offset.x;
-        let line = line.render(start, end);
+        let end = width + start;
 
-        print!("{}\r", line);
+        let line = line.render(start, end);
+        print!("{line}\r");
     }
 
     fn draw(&self) {
