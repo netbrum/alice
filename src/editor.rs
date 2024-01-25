@@ -70,13 +70,7 @@ impl Editor {
     fn redraw(&self) {
         self.draw();
 
-        let position = &self.buffer.cursor.position;
-        let offset = &self.buffer.cursor.offset;
-
-        let y = position.y.saturating_sub(offset.y).saturating_add(1);
-        let x = position.x.saturating_sub(offset.x).saturating_add(1);
-
-        print!("{}", escape::cursor::Goto(y, x));
+        print!("{}", self.buffer.cursor);
         Terminal::flush();
     }
 

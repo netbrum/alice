@@ -3,11 +3,12 @@ mod direction;
 use super::Line;
 
 use crate::editor::Position;
+use crate::escape;
 use crate::unix::size::TermSize;
 
 pub use direction::Direction;
 
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, fmt::Display, rc::Rc};
 
 pub struct Cursor {
     pub position: Position,
@@ -101,5 +102,17 @@ impl Cursor {
             let (_, length) = self.size();
             self.position.x = length;
         }
+    }
+}
+
+impl Display for Cursor {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let position = &self.position;
+        let offset = &self.offset;
+
+        let y = position.y.saturating_sub(offset.y).saturating_add(1);
+        let x = position.x.saturating_sub(offset.x).saturating_add(1);
+
+        write!(f, "{}", escape::cursor::Goto(y, x))
     }
 }
