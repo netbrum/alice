@@ -7,3 +7,6 @@ impl std::fmt::Display for Goto {
         write!(f, "\x1b[{};{}H", self.0, self.1)
     }
 }
+
+csi!(BlinkingBlock, "1 q");
+csi!(BlinkingBar, "5 q");

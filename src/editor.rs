@@ -104,10 +104,12 @@ impl Editor {
             Key::Escape => {
                 self.mode = Mode::Normal;
                 self.buffer.cursor.step(Direction::Left);
+                print!("{}", escape::cursor::BlinkingBlock);
             }
             Key::Char('i') => {
                 self.mode = Mode::Insert;
                 self.buffer.cursor.step(Direction::Right);
+                print!("{}", escape::cursor::BlinkingBar);
             }
             Key::Char(character) => {
                 self.buffer.insert(character);
