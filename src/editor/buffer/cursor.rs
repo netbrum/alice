@@ -2,7 +2,7 @@ mod direction;
 
 use super::Line;
 
-use crate::editor::Position;
+use crate::editor::{Mode, Position};
 use crate::escape;
 use crate::unix::size::TermSize;
 
@@ -60,12 +60,16 @@ impl Cursor {
                 }
             }
         }
-
-        self.overstep();
     }
 
-    pub fn overstep(&mut self) {
+    pub fn overstep(&mut self, mode: &Mode) {
         let (_, length) = self.size();
+
+        let length = if *mode == Mode::Insert {
+            length
+        } else {
+            length.saturating_sub(1)
+        };
 
         if self.position.x > length {
             self.position.x = length;

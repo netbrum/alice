@@ -88,7 +88,9 @@ impl Editor {
                 self.handle_key(key);
             }
 
+            self.buffer.cursor.overstep(&self.mode);
             self.buffer.cursor.scroll(&self.terminal.size);
+
             self.redraw();
         }
     }
@@ -126,7 +128,6 @@ impl Editor {
                 if x > 0 || y > 0 {
                     self.buffer.cursor.backspace();
                     self.buffer.delete();
-                    self.buffer.cursor.overstep();
                 }
             }
             k => print!("{:?}", k),
