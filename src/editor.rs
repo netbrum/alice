@@ -95,23 +95,15 @@ impl Editor {
         }
     }
 
-    fn handle_key(&mut self, key: Key) {
+    fn handle_key_insert(&mut self, key: Key) {
         match key {
-            Key::Ctrl('c') => self.mode = Mode::Exit,
-            Key::Char('h' | 'j' | 'k' | 'l')
-            | Key::ArrowLeft
-            | Key::ArrowDown
-            | Key::ArrowUp
-            | Key::ArrowRight => self.buffer.cursor.step(Direction::from(key)),
+            Key::ArrowLeft | Key::ArrowDown | Key::ArrowUp | Key::ArrowRight => {
+                self.buffer.cursor.step(Direction::from(key))
+            }
             Key::Escape => {
                 self.mode = Mode::Normal;
-                self.buffer.cursor.step(Direction::Left);
                 print!("{}", escape::cursor::BlinkingBlock);
-            }
-            Key::Char('i') => {
-                self.mode = Mode::Insert;
-                self.buffer.cursor.step(Direction::Right);
-                print!("{}", escape::cursor::BlinkingBar);
+                self.buffer.cursor.step(Direction::Left);
             }
             Key::Char(character) => {
                 self.buffer.insert(character);
@@ -130,7 +122,34 @@ impl Editor {
                     self.buffer.delete();
                 }
             }
-            k => print!("{:?}", k),
+            _ => {}
+        }
+    }
+
+    fn handle_key_normal(&mut self, key: Key) {
+        match key {
+            Key::Ctrl('c') => self.mode = Mode::Exit,
+            Key::Char('h' | 'j' | 'k' | 'l')
+            | Key::ArrowLeft
+            | Key::ArrowDown
+            | Key::ArrowUp
+            | Key::ArrowRight => {
+                self.buffer.cursor.step(Direction::from(key));
+            }
+            Key::Char('i') => {
+                self.mode = Mode::Insert;
+                print!("{}", escape::cursor::BlinkingBar);
+                self.buffer.cursor.step(Direction::Right);
+            }
+            _ => {}
+        }
+    }
+
+    fn handle_key(&mut self, key: Key) {
+        match self.mode {
+            Mode::Exit => unreachable!(),
+            Mode::Normal => self.handle_key_normal(key),
+            Mode::Insert => self.handle_key_insert(key),
         }
     }
 }
