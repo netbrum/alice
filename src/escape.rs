@@ -1,13 +1,11 @@
-macro_rules! csi {
-    ($name:ident, $value:expr) => {
-        pub struct $name;
+use std::fmt::Display;
 
-        impl std::fmt::Display for $name {
-            fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-                write!(f, "\x1b[{}", $value)
-            }
-        }
-    };
+pub struct CSI<'a>(pub &'a str);
+
+impl<'a> Display for CSI<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "\x1b[{}", self.0)
+    }
 }
 
 pub mod alternate;

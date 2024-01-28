@@ -1,1 +1,3 @@
-csi!(EntireLine, "2K");
+use super::CSI;
+
+pub const ENTIRE_LINE: CSI = CSI("2K");

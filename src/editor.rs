@@ -40,7 +40,7 @@ impl Editor {
     }
 
     fn draw(&self) {
-        print!("{}", escape::cursor::Reset);
+        print!("{}", escape::cursor::RESET);
 
         let height = self.terminal.size.height as usize;
         let offset = self.buffer.cursor.offset.y;
@@ -48,7 +48,7 @@ impl Editor {
         let lines = self.buffer.data();
 
         for index in 0..height {
-            print!("{}", escape::clear::EntireLine);
+            print!("{}", escape::clear::ENTIRE_LINE);
 
             if let Some(line) = lines.get(offset + index) {
                 self.draw_line(line);
@@ -63,7 +63,7 @@ impl Editor {
     fn initial_draw(&self) {
         self.draw();
 
-        print!("{}", escape::cursor::Reset);
+        print!("{}", escape::cursor::RESET);
         Terminal::flush();
     }
 
@@ -102,7 +102,7 @@ impl Editor {
             }
             Key::Escape => {
                 self.mode = Mode::Normal;
-                print!("{}", escape::cursor::BlinkingBlock);
+                print!("{}", escape::cursor::BLINKING_BLOCK);
                 self.buffer.cursor.step(Direction::Left);
             }
             Key::Char(character) => {
@@ -138,7 +138,7 @@ impl Editor {
             }
             Key::Char('i') => {
                 self.mode = Mode::Insert;
-                print!("{}", escape::cursor::BlinkingBar);
+                print!("{}", escape::cursor::BLINKING_BAR);
                 self.buffer.cursor.step(Direction::Right);
             }
             _ => {}
