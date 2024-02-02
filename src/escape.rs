@@ -10,4 +10,5 @@ impl<'a> Display for CSI<'a> {
 
 pub mod alternate;
 pub mod clear;
+pub mod color;
 pub mod cursor;
