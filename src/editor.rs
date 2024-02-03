@@ -1,6 +1,7 @@
 mod buffer;
 mod mode;
 mod position;
+mod status;
 mod terminal;
 
 use super::arg::Args;
@@ -11,6 +12,7 @@ use super::input::EventIterator;
 use buffer::{cursor::Direction, line::Line, Buffer};
 use mode::Mode;
 use position::Position;
+use status::Status;
 use terminal::Terminal;
 
 use std::io::{self, Result};
@@ -36,7 +38,7 @@ impl Editor {
         let end = width + start;
 
         let line = line.render(start, end);
-        print!("{line}\r");
+        print!("{line}\r\n");
     }
 
     fn draw(&self) {
@@ -52,12 +54,10 @@ impl Editor {
 
             if let Some(line) = lines.get(offset + index) {
                 self.draw_line(line);
-
-                if index != height - 1 {
-                    println!();
-                }
             }
         }
+
+        Status::draw(self);
     }
 
     fn initial_draw(&self) {

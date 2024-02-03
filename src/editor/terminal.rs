@@ -1,3 +1,5 @@
+use super::status::RESERVED_HEIGHT;
+
 use crate::alternate::{AlternateBuffer, IntoAlternateBuffer};
 use crate::raw::{IntoRawMode, RawTerminal};
 use crate::system::size::{self, TermSize};
@@ -12,7 +14,9 @@ pub struct Terminal {
 impl Terminal {
     pub fn new() -> Result<Self> {
         let _out = io::stdout().into_alternate_buffer()?.into_raw_mode()?;
-        let size = size::get_terminal_size()?;
+        let mut size = size::get_terminal_size()?;
+
+        size.height = size.height.saturating_sub(RESERVED_HEIGHT);
 
         Ok(Self { size, _out })
     }
