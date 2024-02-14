@@ -1,3 +1,7 @@
+mod key;
+
+pub use key::Key;
+
 use std::io::{Error, ErrorKind, Result};
 
 const CTRL_1_OFFSET: u8 = 0x60;
@@ -10,40 +14,6 @@ const UTF8_ERROR: &str = "Character is not valid UTF-8";
 pub enum Event {
     Key(Key),
     Unknown(Vec<u8>),
-}
-
-#[derive(Debug)]
-pub enum Key {
-    Escape,
-    Insert,
-    Delete,
-    Home,
-    End,
-    Backspace,
-    ArrowUp,
-    ArrowDown,
-    ArrowLeft,
-    ArrowRight,
-    PageUp,
-    PageDown,
-    Tab,
-    Enter,
-    F1,
-    F2,
-    F3,
-    F4,
-    F5,
-    F6,
-    F7,
-    F8,
-    F9,
-    F10,
-    F11,
-    F12,
-    Null,
-    Alt(char),
-    Ctrl(char),
-    Char(char),
 }
 
 pub fn parse_event<T>(byte: u8, iter: &mut T) -> Result<Event>
