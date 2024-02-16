@@ -5,6 +5,7 @@ pub enum Mode {
     Exit,
     Normal,
     Insert,
+    Command,
 }
 
 impl Display for Mode {
@@ -13,6 +14,7 @@ impl Display for Mode {
             Self::Exit => "Exit",
             Self::Normal => "Normal",
             Self::Insert => "Insert",
+            Self::Command => "Command",
         };
 
         write!(f, "{mode}")

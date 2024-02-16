@@ -1,4 +1,5 @@
 mod buffer;
+mod command;
 mod mode;
 mod position;
 mod status;
@@ -10,6 +11,7 @@ use super::event::Key;
 use super::input::EventIterator;
 
 use buffer::{cursor::Direction, line::Line, Buffer};
+use command::Command;
 use mode::Mode;
 use position::Position;
 use status::Status;
@@ -21,6 +23,7 @@ pub struct Editor {
     terminal: Terminal,
     buffer: Buffer,
     mode: Mode,
+    command: Command,
 }
 
 impl Editor {
@@ -29,6 +32,7 @@ impl Editor {
             terminal: Terminal::new()?,
             buffer: Buffer::from_file(&args.path)?,
             mode: Mode::Normal,
+            command: Command::default(),
         })
     }
 
@@ -70,7 +74,10 @@ impl Editor {
     fn redraw(&self) {
         self.draw();
 
-        print!("{}", self.buffer.cursor);
+        if self.mode != Mode::Command {
+            print!("{}", self.buffer.cursor);
+        }
+
         Terminal::flush();
     }
 
@@ -126,9 +133,34 @@ impl Editor {
         }
     }
 
+    fn handle_key_command(&mut self, key: Key) {
+        match key {
+            Key::Escape => {
+                self.mode = Mode::Normal;
+                print!("{}", escape::cursor::BLINKING_BLOCK);
+                self.command.clear();
+            }
+            Key::Backspace => self.command.delete(),
+            Key::Enter => {
+                if let [Key::Char('q')] = self.command.keys() {
+                    self.mode = Mode::Exit;
+                } else {
+                    self.command.clear();
+                    self.mode = Mode::Normal;
+                    print!("{}", escape::cursor::BLINKING_BLOCK);
+                }
+            }
+            Key::Char(_) => self.command.insert(key),
+            _ => {}
+        }
+    }
+
     fn handle_key_normal(&mut self, key: Key) {
         match key {
-            Key::Ctrl('c') => self.mode = Mode::Exit,
+            Key::Char(' ') => {
+                self.mode = Mode::Command;
+                print!("{}", escape::cursor::BLINKING_BAR);
+            }
             Key::Char('h' | 'j' | 'k' | 'l')
             | Key::ArrowLeft
             | Key::ArrowDown
@@ -150,6 +182,7 @@ impl Editor {
             Mode::Exit => unreachable!(),
             Mode::Normal => self.handle_key_normal(key),
             Mode::Insert => self.handle_key_insert(key),
+            Mode::Command => self.handle_key_command(key),
         }
     }
 }

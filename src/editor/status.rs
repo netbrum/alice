@@ -3,7 +3,7 @@ use super::{Editor, Mode, Position};
 use crate::escape;
 use crate::system::size::TermSize;
 
-pub const RESERVED_HEIGHT: u16 = 1;
+pub const RESERVED_HEIGHT: u16 = 2;
 
 pub struct Status;
 
@@ -13,6 +13,7 @@ impl Status {
             Mode::Exit => escape::color::RED_BACKGROUND,
             Mode::Normal => escape::color::BRIGHT_GREEN_BACKGROUND,
             Mode::Insert => escape::color::BRIGHT_WHITE_BACKGROUND,
+            Mode::Command => escape::color::YELLOW_BACKGROUND,
         };
 
         print!("{}", background);
@@ -50,5 +51,15 @@ impl Status {
         Self::draw_position(&TermSize { height, width }, &editor.buffer.cursor.position);
 
         print!("{}", escape::color::RESET);
+
+        print!(
+            "{}",
+            escape::cursor::Goto(height.saturating_add(1) as usize, 0)
+        );
+        print!("{}", escape::clear::ENTIRE_LINE);
+
+        if editor.mode == Mode::Command {
+            print!(":{}", editor.command);
+        }
     }
 }
