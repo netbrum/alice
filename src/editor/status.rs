@@ -1,4 +1,4 @@
-use super::{Editor, Mode, Position};
+use super::{Command, Mode, Position};
 
 use crate::escape;
 use crate::system::size::TermSize;
@@ -8,6 +8,12 @@ pub const RESERVED_HEIGHT: u16 = 2;
 pub struct Status;
 
 impl Status {
+    fn draw_command(mode: &Mode, command: &Command) {
+        if *mode == Mode::Command {
+            print!(":{command}");
+        }
+    }
+
     fn draw_mode(mode: &Mode) {
         let background = match mode {
             Mode::Exit => escape::color::RED_BACKGROUND,
@@ -20,9 +26,10 @@ impl Status {
         print!("{}", escape::color::BLACK_FOREGROUND);
 
         print!(" {} ", mode.to_string().to_uppercase());
+        print!("{}", escape::color::RESET);
     }
 
-    fn draw_position(size: &TermSize, position: &Position) {
+    fn draw_position(position: &Position, size: &TermSize) {
         print!("{}", escape::color::DEFAULT_BACKGROUND);
         print!("{}", escape::color::BRIGHT_BLACK_FOREGROUND);
 
@@ -38,28 +45,22 @@ impl Status {
         );
 
         print!("{goto}{position}");
+        print!("{}", escape::color::RESET);
     }
 
-    pub fn draw(editor: &Editor) {
-        let height = editor.terminal.size.height.saturating_add(1);
-        let width = editor.terminal.size.width.saturating_add(1);
+    pub fn draw(size: &TermSize, mode: &Mode, position: &Position, command: &Command) {
+        let height = size.height.saturating_add(1);
+        let width = size.width.saturating_add(1);
 
-        print!("{}", escape::cursor::Goto(height as usize, 0));
-        print!("{}", escape::clear::ENTIRE_LINE);
+        let size = &TermSize { height, width };
 
-        Self::draw_mode(&editor.mode);
-        Self::draw_position(&TermSize { height, width }, &editor.buffer.cursor.position);
+        let goto = escape::cursor::Goto(size.height as usize, 0);
+        print!("{goto}{}", escape::clear::ENTIRE_LINE);
+        Self::draw_mode(mode);
+        Self::draw_position(position, size);
 
-        print!("{}", escape::color::RESET);
-
-        print!(
-            "{}",
-            escape::cursor::Goto(height.saturating_add(1) as usize, 0)
-        );
-        print!("{}", escape::clear::ENTIRE_LINE);
-
-        if editor.mode == Mode::Command {
-            print!(":{}", editor.command);
-        }
+        let goto = escape::cursor::Goto(size.height.saturating_add(1) as usize, 0);
+        print!("{goto}{}", escape::clear::ENTIRE_LINE);
+        Self::draw_command(mode, command);
     }
 }

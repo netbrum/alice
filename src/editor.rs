@@ -61,7 +61,12 @@ impl Editor {
             }
         }
 
-        Status::draw(self);
+        Status::draw(
+            &self.terminal.size,
+            &self.mode,
+            &self.buffer.cursor.position,
+            &self.command,
+        );
     }
 
     fn initial_draw(&self) {
