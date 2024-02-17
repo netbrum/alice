@@ -1,13 +1,33 @@
+mod message;
+
 use super::{Command, Mode, Position};
 
 use crate::escape;
 use crate::system::size::TermSize;
 
+pub use message::Message;
+
 pub const RESERVED_HEIGHT: u16 = 2;
 
-pub struct Status;
+#[derive(Default)]
+pub struct Status {
+    pub message: Option<Message>,
+}
 
 impl Status {
+    fn draw_message(&self, mode: &Mode, size: &TermSize) {
+        if let Some(message) = &self.message {
+            if *mode != Mode::Command && !message.is_old() {
+                let mut message = message.data.clone();
+                message.truncate(size.width.saturating_sub(1) as usize);
+
+                print!("{}", escape::color::RED_FOREGROUND);
+                print!("{message}");
+                print!("{}", escape::color::RESET);
+            }
+        }
+    }
+
     fn draw_command(mode: &Mode, command: &Command) {
         if *mode == Mode::Command {
             print!(":{command}");
@@ -48,7 +68,7 @@ impl Status {
         print!("{}", escape::color::RESET);
     }
 
-    pub fn draw(size: &TermSize, mode: &Mode, position: &Position, command: &Command) {
+    pub fn draw(&self, size: &TermSize, mode: &Mode, position: &Position, command: &Command) {
         let height = size.height.saturating_add(1);
         let width = size.width.saturating_add(1);
 
@@ -62,5 +82,6 @@ impl Status {
         let goto = escape::cursor::Goto(size.height.saturating_add(1) as usize, 0);
         print!("{goto}{}", escape::clear::ENTIRE_LINE);
         Self::draw_command(mode, command);
+        self.draw_message(mode, size);
     }
 }

@@ -14,7 +14,7 @@ use buffer::{cursor::Direction, line::Line, Buffer};
 use command::Command;
 use mode::Mode;
 use position::Position;
-use status::Status;
+use status::{Message, Status};
 use terminal::Terminal;
 
 use std::io::{self, Result};
@@ -24,6 +24,7 @@ pub struct Editor {
     buffer: Buffer,
     mode: Mode,
     command: Command,
+    status: Status,
 }
 
 impl Editor {
@@ -33,6 +34,7 @@ impl Editor {
             buffer: Buffer::from_file(&args.path)?,
             mode: Mode::Normal,
             command: Command::default(),
+            status: Status::default(),
         })
     }
 
@@ -61,7 +63,7 @@ impl Editor {
             }
         }
 
-        Status::draw(
+        self.status.draw(
             &self.terminal.size,
             &self.mode,
             &self.buffer.cursor.position,
@@ -146,16 +148,22 @@ impl Editor {
                 self.command.clear();
             }
             Key::Backspace => self.command.delete(),
-            Key::Enter => {
-                if let [Key::Char('q')] = self.command.keys() {
+            Key::Char(_) => self.command.insert(key),
+            Key::Enter => match self.command.keys() {
+                [Key::Char('q')] => {
                     self.mode = Mode::Exit;
-                } else {
+                }
+                keys => {
+                    let command: String = keys.iter().map(|key| key.to_string()).collect();
+                    let not_found = format!("Not a command: {}", command);
+
+                    self.status.message = Some(Message::new(&not_found));
+
                     self.command.clear();
                     self.mode = Mode::Normal;
                     print!("{}", escape::cursor::BLINKING_BLOCK);
                 }
-            }
-            Key::Char(_) => self.command.insert(key),
+            },
             _ => {}
         }
     }
@@ -164,6 +172,7 @@ impl Editor {
         match key {
             Key::Char(' ') => {
                 self.mode = Mode::Command;
+                self.status.message = None;
                 print!("{}", escape::cursor::BLINKING_BAR);
             }
             Key::Char('h' | 'j' | 'k' | 'l')
