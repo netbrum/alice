@@ -18,7 +18,7 @@ impl Command {
         self.0.pop();
     }
 
-    pub fn keys(&mut self) -> &[Key] {
+    pub fn keys(&self) -> &[Key] {
         &self.0[..]
     }
 }
