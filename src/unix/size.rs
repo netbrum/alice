@@ -20,16 +20,3 @@ pub fn get_terminal_size() -> Result<TermSize> {
         })
     }
 }
-
-pub fn get_terminal_size_pixels() -> Result<TermSize> {
-    unsafe {
-        let mut size: MaybeUninit<winsize> = MaybeUninit::uninit();
-        c_result(ioctl(STDIN_FILENO, TIOCGWINSZ, size.as_mut_ptr()))?;
-        let size = size.assume_init();
-
-        Ok(TermSize {
-            height: size.ws_ypixel,
-            width: size.ws_xpixel,
-        })
-    }
-}
