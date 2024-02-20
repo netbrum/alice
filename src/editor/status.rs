@@ -47,7 +47,7 @@ impl Status {
             Mode::Command => escape::color::YELLOW_BACKGROUND,
         };
 
-        print!("{}", background);
+        print!("{background}");
         print!("{}", escape::color::BLACK_FOREGROUND);
 
         print!(" {} ", mode.to_string().to_uppercase());
