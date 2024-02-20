@@ -14,7 +14,7 @@ use buffer::{cursor::Direction, line::Line, Buffer};
 use command::Command;
 use mode::Mode;
 use position::Position;
-use status::{Message, Status};
+use status::{message::Message, Status};
 use terminal::Terminal;
 
 use std::io::{self, Result};
@@ -145,16 +145,20 @@ impl Editor {
             [Key::Char('q')] => {
                 return self.mode = Mode::Exit;
             }
-            [Key::Char('w')] => {
-                if let Err(error) = self.buffer.save() {
-                    self.status.message = Some(Message::new(&error.to_string()));
+            [Key::Char('w')] => match self.buffer.save() {
+                Ok(bytes) => {
+                    let message = format!("Wrote {bytes} bytes to file");
+                    self.status.message = Some(Message::new(&message));
                 }
-            }
+                Err(error) => {
+                    self.status.message = Some(Message::new_err(&error.to_string()));
+                }
+            },
             keys => {
                 let command: String = keys.iter().map(|key| key.to_string()).collect();
                 let not_found = format!("Not a command: {}", command);
 
-                self.status.message = Some(Message::new(&not_found));
+                self.status.message = Some(Message::new_err(&not_found));
             }
         }
 

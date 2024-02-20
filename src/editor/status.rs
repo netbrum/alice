@@ -1,11 +1,11 @@
-mod message;
+pub mod message;
 
 use super::{Command, Mode, Position};
 
 use crate::escape;
 use crate::system::size::TermSize;
 
-pub use message::Message;
+use message::{Message, MessageVariant};
 
 pub const RESERVED_HEIGHT: u16 = 2;
 
@@ -18,10 +18,15 @@ impl Status {
     fn draw_message(&self, mode: &Mode, size: &TermSize) {
         if let Some(message) = &self.message {
             if *mode != Mode::Command && !message.is_old() {
+                let foreground = match message.variant {
+                    MessageVariant::Normal => escape::color::DEFAULT_FOREGROUND,
+                    MessageVariant::Error => escape::color::RED_FOREGROUND,
+                };
+
                 let mut message = message.data.clone();
                 message.truncate(size.width.saturating_sub(1) as usize);
 
-                print!("{}", escape::color::RED_FOREGROUND);
+                print!("{foreground}");
                 print!("{message}");
                 print!("{}", escape::color::RESET);
             }
