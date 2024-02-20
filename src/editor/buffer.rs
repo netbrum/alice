@@ -7,7 +7,7 @@ use line::Line;
 use std::{
     cell::{Ref, RefCell},
     fs::File,
-    io::{Read, Result},
+    io::{Read, Result, Write},
     path::PathBuf,
     rc::Rc,
 };
@@ -15,7 +15,7 @@ use std::{
 pub struct Buffer {
     pub cursor: Cursor,
     data: Rc<RefCell<Vec<Line>>>,
-    path: Option<PathBuf>,
+    path: PathBuf,
 }
 
 impl Buffer {
@@ -29,7 +29,7 @@ impl Buffer {
 
         let data = Rc::new(RefCell::new(lines));
         let cursor = Cursor::new(Rc::clone(&data));
-        let path = Some(path.canonicalize()?);
+        let path = path.canonicalize()?;
 
         Ok(Self { data, cursor, path })
     }
@@ -74,5 +74,28 @@ impl Buffer {
                 line.delete(position.x);
             }
         }
+    }
+
+    pub fn save(&self) -> Result<usize> {
+        let mut file = File::create(&self.path)?;
+
+        let lines = self.data();
+
+        // This is probably not very effective, as to_vec copies the byte slice, however,
+        // using an iterator to collect the bytes and writing to file once is preferable
+        //
+        // Doing it with an iterator without copying the slice to append the newline is probably
+        // not possible due to rust's ownership rules
+        let data: Vec<u8> = lines
+            .iter()
+            .flat_map(|line| {
+                let mut bytes = line.as_bytes().to_vec();
+                bytes.push(b'\n');
+
+                bytes
+            })
+            .collect();
+
+        file.write(&data)
     }
 }

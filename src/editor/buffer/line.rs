@@ -63,6 +63,10 @@ impl Line {
         self.data = format!("{start}{end}");
         self.update();
     }
+
+    pub fn as_bytes(&self) -> &[u8] {
+        self.data.as_bytes()
+    }
 }
 
 impl From<&str> for Line {

@@ -140,6 +140,29 @@ impl Editor {
         }
     }
 
+    fn command_handler(&mut self) {
+        match self.command.keys() {
+            [Key::Char('q')] => {
+                return self.mode = Mode::Exit;
+            }
+            [Key::Char('w')] => {
+                if let Err(error) = self.buffer.save() {
+                    self.status.message = Some(Message::new(&error.to_string()));
+                }
+            }
+            keys => {
+                let command: String = keys.iter().map(|key| key.to_string()).collect();
+                let not_found = format!("Not a command: {}", command);
+
+                self.status.message = Some(Message::new(&not_found));
+            }
+        }
+
+        self.command.clear();
+        self.mode = Mode::Normal;
+        print!("{}", escape::cursor::BLINKING_BLOCK);
+    }
+
     fn handle_key_command(&mut self, key: Key) {
         match key {
             Key::Escape => {
@@ -149,21 +172,7 @@ impl Editor {
             }
             Key::Backspace => self.command.delete(),
             Key::Char(_) => self.command.insert(key),
-            Key::Enter => match self.command.keys() {
-                [Key::Char('q')] => {
-                    self.mode = Mode::Exit;
-                }
-                keys => {
-                    let command: String = keys.iter().map(|key| key.to_string()).collect();
-                    let not_found = format!("Not a command: {}", command);
-
-                    self.status.message = Some(Message::new(&not_found));
-
-                    self.command.clear();
-                    self.mode = Mode::Normal;
-                    print!("{}", escape::cursor::BLINKING_BLOCK);
-                }
-            },
+            Key::Enter => self.command_handler(),
             _ => {}
         }
     }
