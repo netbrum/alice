@@ -107,6 +107,28 @@ impl Cursor {
             self.position.x = length;
         }
     }
+
+    pub fn top(&mut self) {
+        self.position.y = 0;
+    }
+
+    pub fn bottom(&mut self) {
+        self.position.y = self.data.borrow().len().saturating_sub(1);
+    }
+
+    pub fn start(&mut self) {
+        self.position.x = 0;
+    }
+
+    pub fn end(&mut self) {
+        let (_, length) = self.size();
+
+        self.position.x = length.saturating_sub(1);
+    }
+
+    pub fn center(&mut self, size: &TermSize) {
+        self.offset.y = self.position.y.saturating_sub(size.height as usize / 2);
+    }
 }
 
 impl Display for Cursor {

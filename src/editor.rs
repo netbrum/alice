@@ -195,6 +195,21 @@ impl Editor {
             | Key::ArrowRight => {
                 self.buffer.cursor.step(Direction::from(key));
             }
+            Key::Char('g') => {
+                self.buffer.cursor.top();
+            }
+            Key::Char('G') => {
+                self.buffer.cursor.bottom();
+            }
+            Key::Char('f') => {
+                self.buffer.cursor.start();
+            }
+            Key::Char('F') => {
+                self.buffer.cursor.end();
+            }
+            Key::Char('C') => {
+                self.buffer.cursor.center(&self.terminal.size);
+            }
             Key::Char('i') => {
                 self.mode = Mode::Insert;
                 print!("{}", escape::cursor::BLINKING_BAR);
