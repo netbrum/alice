@@ -66,6 +66,7 @@ impl Editor {
         self.status.draw(
             &self.terminal.size,
             &self.mode,
+            self.buffer.file_name(),
             &self.buffer.cursor.position,
             &self.command,
         );

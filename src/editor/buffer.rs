@@ -6,6 +6,7 @@ use line::Line;
 
 use std::{
     cell::{Ref, RefCell},
+    ffi::OsStr,
     fs::File,
     io::{Read, Result, Write},
     path::PathBuf,
@@ -36,6 +37,17 @@ impl Buffer {
 
     pub fn data(&self) -> Ref<'_, Vec<Line>> {
         self.data.borrow()
+    }
+
+    pub fn file_name(&self) -> String {
+        let file_name = self
+            .path
+            .file_name()
+            .unwrap_or(OsStr::new("Unknown"))
+            .to_str()
+            .unwrap_or("Unknown");
+
+        String::from(file_name)
     }
 
     pub fn newline(&self) {

@@ -54,6 +54,12 @@ impl Status {
         print!("{}", escape::color::RESET);
     }
 
+    fn draw_file_name(file_name: String) {
+        print!("{}", escape::color::BRIGHT_BLACK_FOREGROUND);
+        print!(" {file_name} ");
+        print!("{}", escape::color::RESET);
+    }
+
     fn draw_position(position: &Position, size: &TermSize) {
         print!("{}", escape::color::DEFAULT_BACKGROUND);
         print!("{}", escape::color::BRIGHT_BLACK_FOREGROUND);
@@ -73,7 +79,14 @@ impl Status {
         print!("{}", escape::color::RESET);
     }
 
-    pub fn draw(&self, size: &TermSize, mode: &Mode, position: &Position, command: &Command) {
+    pub fn draw(
+        &self,
+        size: &TermSize,
+        mode: &Mode,
+        file_name: String,
+        position: &Position,
+        command: &Command,
+    ) {
         let height = size.height.saturating_add(1);
         let width = size.width.saturating_add(1);
 
@@ -82,6 +95,7 @@ impl Status {
         let goto = escape::cursor::Goto(size.height as usize, 0);
         print!("{goto}{}", escape::clear::ENTIRE_LINE);
         Self::draw_mode(mode);
+        Self::draw_file_name(file_name);
         Self::draw_position(position, size);
 
         let goto = escape::cursor::Goto(size.height.saturating_add(1) as usize, 0);
