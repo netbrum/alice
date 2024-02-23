@@ -141,31 +141,26 @@ impl Editor {
         }
     }
 
-    fn command_handler(&mut self) {
+    fn handle_command(&mut self) -> Option<Message> {
         match self.command.keys() {
             [Key::Char('q')] => {
-                return self.mode = Mode::Exit;
+                self.mode = Mode::Exit;
+                None
             }
             [Key::Char('w')] => match self.buffer.save() {
                 Ok(bytes) => {
                     let message = format!("Wrote {bytes} bytes to file");
-                    self.status.message = Some(Message::new(&message));
+                    Some(Message::new(&message))
                 }
-                Err(error) => {
-                    self.status.message = Some(Message::new_err(&error.to_string()));
-                }
+                Err(error) => Some(Message::new_err(&error.to_string())),
             },
             keys => {
                 let command: String = keys.iter().map(|key| key.to_string()).collect();
                 let not_found = format!("Not a command: {}", command);
 
-                self.status.message = Some(Message::new_err(&not_found));
+                Some(Message::new_err(&not_found))
             }
         }
-
-        self.command.clear();
-        self.mode = Mode::Normal;
-        print!("{}", escape::cursor::BLINKING_BLOCK);
     }
 
     fn handle_key_command(&mut self, key: Key) {
@@ -177,7 +172,15 @@ impl Editor {
             }
             Key::Backspace => self.command.delete(),
             Key::Char(_) => self.command.insert(key),
-            Key::Enter => self.command_handler(),
+            Key::Enter => {
+                self.status.message = self.handle_command();
+
+                if self.mode != Mode::Exit {
+                    self.command.clear();
+                    self.mode = Mode::Normal;
+                    print!("{}", escape::cursor::BLINKING_BLOCK);
+                }
+            }
             _ => {}
         }
     }
