@@ -26,7 +26,11 @@ impl Buffer {
 
         file.read_to_string(&mut data)?;
 
-        let lines = data.lines().map(Line::from).collect();
+        let mut lines: Vec<Line> = data.lines().map(Line::from).collect();
+
+        if lines.is_empty() {
+            lines.push(Line::default());
+        }
 
         let data = Rc::new(RefCell::new(lines));
         let cursor = Cursor::new(Rc::clone(&data));
