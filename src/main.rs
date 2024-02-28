@@ -1,6 +1,4 @@
-use alice::editor::Editor;
-use alice::escape;
-use alice::{arg::Args, system::attr};
+use alice::{arg::Args, editor::Editor, escape, system::attr};
 
 use clap::Parser;
 
