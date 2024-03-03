@@ -63,8 +63,9 @@ impl Cursor {
     }
 
     pub fn overstep(&mut self, mode: &Mode) {
-        let (_, length) = self.size();
+        let (height, length) = self.size();
 
+        let height = height.saturating_sub(1);
         let length = if *mode == Mode::Insert {
             length
         } else {
@@ -73,6 +74,10 @@ impl Cursor {
 
         if self.position.x > length {
             self.position.x = length;
+        }
+
+        if self.position.y > height {
+            self.position.y = height;
         }
     }
 
