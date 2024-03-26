@@ -1,20 +1,26 @@
 pub mod cursor;
 pub mod line;
 
+use crate::highlight;
+
 use cursor::Cursor;
 use line::Line;
 
 use std::{
     cell::{Ref, RefCell},
     ffi::OsStr,
+    fmt::Write as fmtWrite,
     fs::File,
     io::{Read, Result, Write},
     path::PathBuf,
     rc::Rc,
 };
 
+use tree_sitter_highlight::HighlightConfiguration;
+
 pub struct Buffer {
     pub cursor: Cursor,
+    config: Option<HighlightConfiguration>,
     data: Rc<RefCell<Vec<Line>>>,
     path: PathBuf,
 }
@@ -32,11 +38,36 @@ impl Buffer {
             lines.push(Line::default());
         }
 
+        let config = highlight::config(path);
         let data = Rc::new(RefCell::new(lines));
         let cursor = Cursor::new(Rc::clone(&data));
         let path = path.canonicalize()?;
 
-        Ok(Self { data, cursor, path })
+        Ok(Self {
+            data,
+            cursor,
+            path,
+            config,
+        })
+    }
+
+    pub fn regenerate_highlights(&mut self) {
+        if let Some(config) = &self.config {
+            let source = self.data().iter().fold(String::new(), |mut output, line| {
+                _ = writeln!(output, "{line}");
+
+                output
+            });
+
+            if let Ok(colors) = highlight::colors(config, source.as_bytes()) {
+                let mut offset = 0;
+
+                for line in self.data.borrow_mut().iter_mut() {
+                    line.highlights = Some(colors[offset..offset + line.len()].to_vec());
+                    offset += line.len() + 1;
+                }
+            };
+        }
     }
 
     pub fn data(&self) -> Ref<'_, Vec<Line>> {

@@ -17,6 +17,7 @@ use position::Position;
 use status::{message::Message, Status};
 use terminal::Terminal;
 
+use std::fmt::Write;
 use std::io::{self, Result};
 
 pub struct Editor {
@@ -43,8 +44,27 @@ impl Editor {
         let width = self.terminal.size.width as usize;
         let end = width + start;
 
+        let highlights = &line.highlights;
         let line = line.render(start, end);
-        print!("{line}\r\n");
+
+        let data = line
+            .chars()
+            .enumerate()
+            .fold(String::new(), |mut output, (index, char)| {
+                if let Some(highlights) = &highlights {
+                    _ = write!(
+                        output,
+                        "{}",
+                        highlights[index + self.buffer.cursor.offset.x]
+                    );
+                }
+
+                _ = write!(output, "{char}");
+
+                output
+            });
+
+        print!("{data}\r\n");
     }
 
     fn draw(&self) {
@@ -72,7 +92,8 @@ impl Editor {
         );
     }
 
-    fn initial_draw(&self) {
+    fn initial_draw(&mut self) {
+        self.buffer.regenerate_highlights();
         self.draw();
 
         print!("{}", escape::cursor::RESET);
@@ -105,6 +126,7 @@ impl Editor {
 
             self.buffer.cursor.overstep(&self.mode);
             self.buffer.cursor.scroll(&self.terminal.size);
+            self.buffer.regenerate_highlights();
 
             self.redraw();
         }

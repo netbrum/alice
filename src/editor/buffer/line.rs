@@ -2,8 +2,11 @@ use std::fmt::Display;
 
 use unicode_segmentation::UnicodeSegmentation;
 
+use crate::escape::CSI;
+
 #[derive(Default)]
 pub struct Line {
+    pub highlights: Option<Vec<CSI>>,
     data: String,
     length: usize,
 }
@@ -12,7 +15,11 @@ impl Line {
     pub fn new(data: String) -> Self {
         let length = data.graphemes(true).count();
 
-        Self { data, length }
+        Self {
+            data,
+            length,
+            highlights: None,
+        }
     }
 
     pub fn render(&self, start: usize, end: usize) -> &str {
