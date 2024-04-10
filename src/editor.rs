@@ -80,6 +80,8 @@ impl Editor {
 
             if let Some(line) = lines.get(offset + index) {
                 self.draw_line(line);
+            } else {
+                println!();
             }
         }
 
