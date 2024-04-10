@@ -2,7 +2,7 @@ mod direction;
 
 use super::Line;
 
-use crate::editor::{Mode, Position};
+use crate::editor::{self, Mode, Position};
 use crate::escape;
 use crate::unix::size::TermSize;
 
@@ -93,8 +93,10 @@ impl Cursor {
             self.offset.y = self.position.y;
         }
 
-        if self.position.x > self.offset.x.saturating_add(width) {
-            self.offset.x = self.position.x.saturating_sub(width);
+        let ln_offset = editor::ln_offset(&self.data.borrow());
+
+        if self.position.x > self.offset.x.saturating_add(width - ln_offset) {
+            self.offset.x = self.position.x.saturating_sub(width - ln_offset);
         }
 
         if self.position.x < self.offset.x {
@@ -144,6 +146,8 @@ impl Display for Cursor {
         let y = position.y.saturating_sub(offset.y).saturating_add(1);
         let x = position.x.saturating_sub(offset.x).saturating_add(1);
 
-        write!(f, "{}", escape::cursor::Goto(y, x))
+        let offset = editor::ln_offset(&self.data.borrow());
+
+        write!(f, "{}", escape::cursor::Goto(y, x + offset))
     }
 }

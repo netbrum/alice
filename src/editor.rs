@@ -20,6 +20,12 @@ use terminal::Terminal;
 use std::fmt::Write;
 use std::io::{self, Result};
 
+const LINE_NUMBER_COLUMN_GAP: usize = 1;
+
+fn ln_offset(lines: &[Line]) -> usize {
+    super::digits(lines.len()) + LINE_NUMBER_COLUMN_GAP
+}
+
 pub struct Editor {
     terminal: Terminal,
     buffer: Buffer,
@@ -39,10 +45,21 @@ impl Editor {
         })
     }
 
-    fn draw_line(&self, line: &Line) {
+    fn line_number(&self, number: usize) -> String {
+        let indent = super::digits(self.buffer.data().len());
+        let digits = super::digits(number);
+
+        format!(
+            "{}{}{number}{} ",
+            " ".repeat(indent - digits),
+            escape::color::BRIGHT_BLACK_FOREGROUND,
+            escape::color::RESET,
+        )
+    }
+
+    fn draw_line(&self, line: &Line, index: usize) {
         let start = self.buffer.cursor.offset.x;
-        let width = self.terminal.size.width as usize;
-        let end = width + start;
+        let end = self.terminal.size.width as usize + start - ln_offset(&self.buffer.data());
 
         let highlights = &line.highlights;
         let line = line.render(start, end);
@@ -64,7 +81,8 @@ impl Editor {
                 output
             });
 
-        print!("{data}\r\n");
+        let ln = self.line_number(index + 1);
+        print!("{ln}{data}\r\n");
     }
 
     fn draw(&self) {
@@ -79,7 +97,7 @@ impl Editor {
             print!("{}", escape::clear::ENTIRE_LINE);
 
             if let Some(line) = lines.get(offset + index) {
-                self.draw_line(line);
+                self.draw_line(line, offset + index);
             } else {
                 println!();
             }
@@ -98,7 +116,9 @@ impl Editor {
         self.buffer.regenerate_highlights();
         self.draw();
 
-        print!("{}", escape::cursor::RESET);
+        let offset = ln_offset(&self.buffer.data());
+
+        print!("{}", escape::cursor::Goto(0, offset + 1));
         Terminal::flush();
     }
 
