@@ -119,6 +119,7 @@ impl Editor {
         let offset = ln_offset(&self.buffer.data());
 
         print!("{}", escape::cursor::Goto(0, offset + 1));
+        print!("{}", escape::cursor::BLINKING_BLOCK);
         Terminal::flush();
     }
 
