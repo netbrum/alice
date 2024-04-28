@@ -4,6 +4,7 @@ mod mode;
 mod position;
 mod status;
 mod terminal;
+mod utils;
 
 use super::arg::Args;
 use super::escape;
@@ -21,10 +22,6 @@ use std::fmt::Write;
 use std::io::{self, Result};
 
 const LINE_NUMBER_COLUMN_GAP: usize = 1;
-
-fn ln_offset(lines: &[Line]) -> usize {
-    super::digits(lines.len()) + LINE_NUMBER_COLUMN_GAP
-}
 
 pub struct Editor {
     terminal: Terminal,
@@ -46,8 +43,8 @@ impl Editor {
     }
 
     fn line_number(&self, number: usize) -> String {
-        let indent = super::digits(self.buffer.data().len());
-        let digits = super::digits(number);
+        let indent = utils::digits(self.buffer.data().len());
+        let digits = utils::digits(number);
 
         format!(
             "{}{}{number}{} ",
@@ -59,7 +56,7 @@ impl Editor {
 
     fn draw_line(&self, line: &Line, index: usize) {
         let start = self.buffer.cursor.offset.x;
-        let end = self.terminal.size.width as usize + start - ln_offset(&self.buffer.data());
+        let end = self.terminal.size.width as usize + start - utils::ln_offset(&self.buffer.data());
 
         let highlights = &line.highlights;
         let line = line.render(start, end);
@@ -116,7 +113,7 @@ impl Editor {
         self.buffer.regenerate_highlights();
         self.draw();
 
-        let offset = ln_offset(&self.buffer.data());
+        let offset = utils::ln_offset(&self.buffer.data());
 
         print!("{}", escape::cursor::Goto(0, offset + 1));
         print!("{}", escape::cursor::BLINKING_BLOCK);

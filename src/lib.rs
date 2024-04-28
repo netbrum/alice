@@ -12,7 +12,3 @@ pub mod event;
 pub mod highlight;
 pub mod input;
 pub mod raw;
-
-fn digits(number: usize) -> usize {
-    number.checked_ilog10().unwrap_or(0) as usize + 1
-}
