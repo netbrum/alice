@@ -87,9 +87,7 @@ impl Cursor {
 
         if self.position.y > self.offset.y.saturating_add(height) {
             self.offset.y = self.position.y.saturating_sub(height);
-        }
-
-        if self.position.y < self.offset.y {
+        } else if self.position.y < self.offset.y {
             self.offset.y = self.position.y;
         }
 
@@ -97,9 +95,7 @@ impl Cursor {
 
         if self.position.x > self.offset.x.saturating_add(width - ln_offset) {
             self.offset.x = self.position.x.saturating_sub(width - ln_offset);
-        }
-
-        if self.position.x < self.offset.x {
+        } else if self.position.x < self.offset.x {
             self.offset.x = self.position.x;
         }
     }
