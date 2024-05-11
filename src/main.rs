@@ -1,11 +1,30 @@
-use alice::{arg::Args, editor::Editor, escape, system::attr};
+use alice::{
+    arg::Args,
+    editor::Editor,
+    escape,
+    system::{attr, log},
+};
 
 use clap::Parser;
 
 use std::io::{self, Write};
 use std::panic;
 
+use tracing::Level;
+use tracing_subscriber::FmtSubscriber;
+
 fn main() {
+    let writer = log::writer().expect("getting output file failed");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(writer);
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::TRACE)
+        .with_writer(non_blocking)
+        .with_ansi(true)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber).expect("setting default subscriber failed");
+
     setup_panic_hook();
 
     let args = Args::parse();

@@ -1,4 +1,5 @@
 pub mod attr;
+pub mod log;
 pub mod size;
 pub mod tty;
 
