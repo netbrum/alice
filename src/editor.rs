@@ -11,6 +11,7 @@ use super::escape;
 use super::event::Key;
 use super::input::EventIterator;
 
+use crate::escape::CSI;
 use buffer::{cursor::Direction, line::Line, Buffer};
 use command::Command;
 use mode::Mode;
@@ -54,6 +55,25 @@ impl Editor {
         )
     }
 
+    fn highlight_line(
+        &self,
+        mut output: String,
+        (index, char): (usize, char),
+        highlights: &Option<Vec<CSI>>,
+    ) -> String {
+        if let Some(highlights) = &highlights {
+            _ = write!(
+                output,
+                "{}",
+                highlights[index + self.buffer.cursor.offset.x]
+            );
+        }
+
+        _ = write!(output, "{char}");
+
+        output
+    }
+
     fn draw_line(&self, line: &Line, index: usize) {
         let start = self.buffer.cursor.offset.x;
         let end = self.terminal.size.width as usize + start - utils::ln_offset(&self.buffer.data());
@@ -61,22 +81,9 @@ impl Editor {
         let highlights = &line.highlights;
         let line = line.render(start, end);
 
-        let data = line
-            .chars()
-            .enumerate()
-            .fold(String::new(), |mut output, (index, char)| {
-                if let Some(highlights) = &highlights {
-                    _ = write!(
-                        output,
-                        "{}",
-                        highlights[index + self.buffer.cursor.offset.x]
-                    );
-                }
-
-                _ = write!(output, "{char}");
-
-                output
-            });
+        let data = line.chars().enumerate().fold(String::new(), |output, ic| {
+            self.highlight_line(output, ic, highlights)
+        });
 
         let ln = self.line_number(index + 1);
         print!("{ln}{data}\r\n");
