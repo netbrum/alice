@@ -29,11 +29,7 @@ impl Cursor {
         let data = self.data.borrow();
 
         let height = data.len();
-        let length = if let Some(line) = data.get(self.position.y) {
-            line.len()
-        } else {
-            0
-        };
+        let length = data.get(self.position.y).unwrap().len();
 
         (height, length)
     }
