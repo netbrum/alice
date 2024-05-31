@@ -1,8 +1,9 @@
+use crate::escape::CSI;
+
 use std::fmt::Display;
+use std::str::Chars;
 
 use unicode_segmentation::UnicodeSegmentation;
-
-use crate::escape::CSI;
 
 #[derive(Default)]
 pub struct Line {
@@ -73,6 +74,10 @@ impl Line {
 
     pub fn as_bytes(&self) -> &[u8] {
         self.data.as_bytes()
+    }
+
+    pub fn chars(&self) -> Chars {
+        self.data.chars()
     }
 }
 

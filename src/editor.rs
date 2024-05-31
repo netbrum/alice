@@ -23,6 +23,7 @@ use std::fmt::Write;
 use std::io::{self, Result};
 
 const LINE_NUMBER_COLUMN_GAP: usize = 1;
+const TAB_SIZE: usize = 2;
 
 pub struct Editor {
     terminal: Terminal,
@@ -81,9 +82,13 @@ impl Editor {
         let highlights = &line.highlights;
         let line = line.render(start, end);
 
-        let data = line.chars().enumerate().fold(String::new(), |output, ic| {
-            self.highlight_line(output, ic, highlights)
-        });
+        let data = line
+            .chars()
+            .enumerate()
+            .fold(String::new(), |output, ic| {
+                self.highlight_line(output, ic, highlights)
+            })
+            .replace('\t', &" ".repeat(TAB_SIZE));
 
         let ln = self.line_number(index + 1);
         print!("{ln}{data}\r\n");
@@ -177,6 +182,10 @@ impl Editor {
                 self.buffer.newline();
                 self.buffer.cursor.step(Direction::Down);
                 self.buffer.cursor.position.x = 0;
+            }
+            Key::Tab => {
+                self.buffer.insert('\t');
+                self.buffer.cursor.step(Direction::Right);
             }
             Key::Backspace => {
                 let Position { x, y } = self.buffer.cursor.position;
