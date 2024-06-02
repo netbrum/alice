@@ -49,10 +49,11 @@ impl Editor {
         let digits = utils::digits(number);
 
         format!(
-            "{}{}{number}{} ",
+            "{}{}{number}{}{}",
             " ".repeat(indent - digits),
             escape::color::BRIGHT_BLACK_FOREGROUND,
             escape::color::RESET,
+            " ".repeat(utils::ln_offset(&self.buffer.data()) - indent)
         )
     }
 
