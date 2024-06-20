@@ -1,7 +1,6 @@
 use crate::escape::CSI;
 
 use std::fmt::Display;
-use std::str::Chars;
 
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -23,11 +22,11 @@ impl Line {
         }
     }
 
-    pub fn render(&self, start: usize, end: usize) -> &str {
+    pub fn render(&self, start: usize, end: usize) -> String {
         let end = end.min(self.data.len());
         let start = start.min(end);
 
-        &self.data[start..end]
+        self.data[start..end].replace('\t', " ")
     }
 
     pub fn len(&self) -> usize {
@@ -74,10 +73,6 @@ impl Line {
 
     pub fn as_bytes(&self) -> &[u8] {
         self.data.as_bytes()
-    }
-
-    pub fn chars(&self) -> Chars {
-        self.data.chars()
     }
 }
 

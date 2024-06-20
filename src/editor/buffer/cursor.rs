@@ -2,7 +2,7 @@ mod direction;
 
 use super::Line;
 
-use crate::editor::{self, Mode, Position, TAB_SIZE};
+use crate::editor::{self, Mode, Position};
 use crate::escape;
 use crate::unix::size::TermSize;
 
@@ -138,13 +138,8 @@ impl Display for Cursor {
         let y = position.y.saturating_sub(offset.y).saturating_add(1);
         let x = position.x.saturating_sub(offset.x).saturating_add(1);
 
-        let data = self.data.borrow();
+        let offset = editor::utils::ln_offset(&self.data.borrow());
 
-        let offset = editor::utils::ln_offset(&data);
-
-        let line = data.get(position.y).unwrap();
-        let tabs = line.chars().take(position.x).filter(|c| *c == '\t').count() * (TAB_SIZE - 1);
-
-        write!(f, "{}", escape::cursor::Goto(y, x + offset + tabs))
+        write!(f, "{}", escape::cursor::Goto(y, x + offset))
     }
 }
