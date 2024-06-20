@@ -2,7 +2,7 @@ mod rust;
 
 use crate::escape::{self, CSI};
 use rust::Rust;
-use std::{ffi::OsStr, path::Path};
+use std::{ffi::OsStr, fmt::Write, path::Path};
 use tree_sitter::QueryError;
 use tree_sitter_highlight::{Error, HighlightConfiguration, HighlightEvent, Highlighter};
 
@@ -121,5 +121,21 @@ pub fn config(path: &Path) -> Option<HighlightConfiguration> {
     match extension {
         "rs" => Rust::config().ok(),
         _ => None,
+    }
+}
+
+pub trait Highlight {
+    fn highlight(self, highlights: &[CSI], offset: usize) -> String;
+}
+
+impl Highlight for &str {
+    fn highlight(self, highlights: &[CSI], offset: usize) -> String {
+        self.chars()
+            .enumerate()
+            .fold(String::new(), |mut output, (index, char)| {
+                _ = write!(output, "{}{char}", highlights[index + offset]);
+
+                output
+            })
     }
 }

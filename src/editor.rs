@@ -9,9 +9,9 @@ mod utils;
 use super::arg::Args;
 use super::escape;
 use super::event::Key;
+use super::highlight::Highlight;
 use super::input::EventIterator;
 
-use crate::escape::CSI;
 use buffer::{cursor::Direction, line::Line, Buffer};
 use command::Command;
 use mode::Mode;
@@ -19,7 +19,6 @@ use position::Position;
 use status::{message::Message, Status};
 use terminal::Terminal;
 
-use std::fmt::Write;
 use std::io::{self, Result};
 
 const LINE_NUMBER_COLUMN_GAP: usize = 1;
@@ -56,38 +55,19 @@ impl Editor {
         )
     }
 
-    fn highlight_line(
-        &self,
-        mut output: String,
-        (index, char): (usize, char),
-        highlights: &Option<Vec<CSI>>,
-    ) -> String {
-        if let Some(highlights) = &highlights {
-            _ = write!(
-                output,
-                "{}",
-                highlights[index + self.buffer.cursor.offset.x]
-            );
-        }
-
-        _ = write!(output, "{char}");
-
-        output
-    }
-
     fn draw_line(&self, line: &Line, index: usize) {
         let start = self.buffer.cursor.offset.x;
         let end = self.terminal.size.width as usize + start - utils::ln_offset(&self.buffer.data());
 
         let highlights = &line.highlights;
-        let line = line.render(start, end);
+        let mut render = line.render(start, end);
 
-        let data = line.chars().enumerate().fold(String::new(), |output, ic| {
-            self.highlight_line(output, ic, highlights)
-        });
+        if let Some(highlights) = highlights {
+            render = render.highlight(highlights, start);
+        }
 
         let ln = self.line_number(index + 1);
-        print!("{ln}{data}\r\n");
+        print!("{ln}{render}\r\n");
     }
 
     fn draw(&self) {
