@@ -9,12 +9,12 @@ use std::{
 
 // Input reader for tty, as it runs in a separate thread it won't block
 pub struct TTYReader {
-    reciever: Receiver<Result<u8>>,
+    receiver: Receiver<Result<u8>>,
 }
 
 impl TTYReader {
     pub fn new() -> Self {
-        let (sender, reciever) = mpsc::channel();
+        let (sender, receiver) = mpsc::channel();
 
         thread::spawn(move || {
             for byte in tty::tty().expect("to read /dev/tty").bytes() {
@@ -24,7 +24,7 @@ impl TTYReader {
             }
         });
 
-        Self { reciever }
+        Self { receiver }
     }
 }
 
@@ -39,7 +39,7 @@ impl Read for TTYReader {
         let mut total = 0;
 
         while total < buf.len() {
-            match self.reciever.try_recv() {
+            match self.receiver.try_recv() {
                 Ok(byte) => {
                     let byte = byte?;
 
