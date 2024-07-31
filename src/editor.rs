@@ -42,14 +42,20 @@ impl Editor {
         })
     }
 
-    fn line_number(&self, number: usize) -> String {
+    fn line_number(&self, number: usize, focus: bool) -> String {
         let indent = utils::digits(self.buffer.data().len());
         let digits = utils::digits(number);
+
+        let color = if focus {
+            escape::color::YELLOW_FOREGROUND
+        } else {
+            escape::color::BRIGHT_BLACK_FOREGROUND
+        };
 
         format!(
             "{}{}{number}{}{}",
             " ".repeat(indent - digits),
-            escape::color::BRIGHT_BLACK_FOREGROUND,
+            color,
             escape::color::RESET,
             " ".repeat(utils::ln_offset(&self.buffer.data()) - indent)
         )
@@ -66,7 +72,7 @@ impl Editor {
             render = render.highlight(highlights, start);
         }
 
-        let ln = self.line_number(index + 1);
+        let ln = self.line_number(index + 1, self.buffer.cursor.position.y == index);
         print!("{ln}{render}\r\n");
     }
 
