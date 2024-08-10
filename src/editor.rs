@@ -77,6 +77,8 @@ impl Editor {
     }
 
     fn draw(&self) {
+        // The cursor will flicker if we don't hide it before drawing
+        print!("{}", escape::cursor::HIDE);
         print!("{}", escape::cursor::RESET);
 
         let height = self.terminal.size.height as usize;
@@ -101,6 +103,8 @@ impl Editor {
             &self.buffer.cursor.position,
             &self.command,
         );
+
+        print!("{}", escape::cursor::SHOW);
     }
 
     fn initial_draw(&mut self) {

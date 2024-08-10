@@ -4,6 +4,8 @@ use std::fmt::Display;
 pub const RESET: CSI = CSI("H");
 pub const BLINKING_BLOCK: CSI = CSI("1 q");
 pub const BLINKING_BAR: CSI = CSI("5 q");
+pub const HIDE: CSI = CSI("25l");
+pub const SHOW: CSI = CSI("25h");
 
 pub struct Goto(pub usize, pub usize);
 
